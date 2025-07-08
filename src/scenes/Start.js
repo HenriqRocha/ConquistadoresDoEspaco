@@ -40,6 +40,11 @@ export class Start extends Phaser.Scene {
         this.tabuleiroPontos[6][0] = 'planeta';
         this.tabuleiroPontos[8][6] = 'planeta';
 
+        //buracos negros
+        this.tabuleiroPontos[6][5] = 'buraco';
+        this.tabuleiroPontos[8][3] = 'buraco';
+        this.tabuleiroPontos[5][1] = 'buraco';
+
         //criando o tabuleiro
         for (let linha = 0; linha < this.tamanhoLinhas; linha++){
             for (let col = 0; col < this.tamanhoColunas; col++){
@@ -81,6 +86,13 @@ export class Start extends Phaser.Scene {
                     y * this.tamanhoCelula + this.tamanhoCelula / 2,
                     this.tamanhoCelula / 6,
                     0x00ff00
+                );
+            } else if (tipo == 'buraco'){
+                marcador = this.add.circle(
+                    x * this.tamanhoCelula + this.tamanhoCelula / 2,
+                    y * this.tamanhoCelula + this.tamanhoCelula / 2,
+                    this.tamanhoCelula / 2.5,
+                    0x480d6a
                 );
             }
 
@@ -152,6 +164,12 @@ export class Start extends Phaser.Scene {
                 this.movimentosRestantes -= custo;
                 //pontuação
                 const tipo = this.tabuleiroPontos[this.playerPosition.y][this.playerPosition.x];
+
+                if (tipo === 'buraco'){//se o jogador cair na casa do buraco, ele morre
+                    this.gameOver();
+                    return;
+                }
+
                 let pontos = 0;
                 if (tipo === 'terra' || tipo === 'nave'){
                     pontos = 4;
@@ -229,5 +247,20 @@ export class Start extends Phaser.Scene {
             this.events.emit('updateUI', this.movimentosRestantes, this.pontuacao);
         }
         
+    }
+
+    gameOver(){
+        this.tweens.add({
+            targets: this.player,
+            alpha: 0,
+            scale: 2,
+            duration: 500,
+            ease: 'Power2',
+            onComplete: () => {
+                this.scene.stop('UI');
+                this.scene.start('GameOver');//para a cena com os botões etc 
+                                            // e inicia a cena de fim de jogo
+            }
+        });
     }
 }
