@@ -10,13 +10,21 @@ export class UI extends Phaser.Scene {
         const gameScene = this.scene.get('Start');
 
         //botões e textos para o usuário
+        this.textoJogadorAtual = this.add.text(10, 920, 'Aguardando...', {
+            fontSize: '28px', fill: '#ffffff'
+        });
+
         this.textoMovimento = this.add.text(10,950, 'Movimentos: 0',
         {fontSize: '24px',
         fill: '#ffffff'});
 
-        this.textoPontuacao = this.add.text(600, 950, 'Pontuação: 0',
-        {fontSize: '24px',
-        fill: '#ffffff'});
+        this.textosPontuacao = [];
+        for (let i = 0; i < gameScene.numeroDeJogadores; i++){
+            const texto = this.add.text(600 + (i * 250), 950, `Jogador ${i + 1}: 0`,{
+                fontSize: '24px', fill: 'ffffff'
+            });
+            this.textosPontuacao.push(texto);
+        }
 
         //criando botão na tela
         this.botaoDado = this.add.text(900, 950, 'Rolar Dado',{
@@ -37,9 +45,16 @@ export class UI extends Phaser.Scene {
         });
 
         //comunicação cenas
-        gameScene.events.on('updateUI', (movimentos, pontuacao) =>{
+        gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
+            this.textoJogadorAtual.setText(`Vez do jogador ${jogadorIndex + 1}`);
             this.textoMovimento.setText('Movimentos: ' + movimentos);
-            this.textoPontuacao.setText('Pontuação: ' + pontuacao);
-        })
+
+            for (let i = 0; i < pontuacoes.length; i++) {
+                if (this.textosPontuacao[i]){
+                    this.textosPontuacao[i].setText(`Jogador ${i + 1}: ${pontuacoes[i]}`);
+                }
+            }
+        });
+        this.events.emit('uiPronta');
     }
 }

@@ -7,19 +7,41 @@ export class Start extends Phaser.Scene {
     preload() {}
 
     create() {
-
         //tamanhos tabuleiro e casas
         this.tamanhoColunas = 12;
         this.tamanhoLinhas = 9;
         this.tamanhoCelula = 100;
+
+        this.numeroDeJogadores = 2;//número de jogadores
+        this.jogadorAtualIndex = 0;//começa com o primeiro jogador
+        this.movimentosRestantes = 0;
+
+        //dados de jogadores
+        this.playerPositions = [];
+        this.players = [];
+        this.pontuacoes = [];
+        this.jogadoresAtivos = [];
+        const playersColors = [0x00d1b2, 0xff8800, 0xde3163, 0x8e44ad];
+
+        //inicializando os dados dos jogadores
+        for (let i = 0; i < this.numeroDeJogadores; i++){
+            this.pontuacoes.push(0);
+            this.jogadoresAtivos.push(true)//todos começam vivos
+            this.playerPositions.push(null);
+
+            //criando jogadores porem invisiveis
+            const playerSprite = this.add.circle(0, 0, this.tamanhoCelula / 4, playersColors[i % playersColors.length])
+                .setVisible(false)
+                .setDepth(2);
+            this.players.push(playerSprite);
+        }
+
+        
         //array para guardar os elementos 'pontuáveis'
         this.tabuleiroPontos = Array.from({ length: this.tamanhoLinhas }, () => Array(this.tamanhoColunas).fill(0));
         //array para colocar os elementos visuais
         this.marcadoresVisuais = Array.from({ length: this.tamanhoLinhas }, () => Array(this.tamanhoColunas).fill(null));
-        this.playerPosition = null; //posição inicial
-        this.player = null; //jogador visual
-        this.movimentosRestantes = 0;
-        this.pontuacao = 0;
+        
 
         //elementos e suas posições no tabuleiro para serem resgatados
         this.tabuleiroPontos[3][4] = 'terra'; // Planeta Terra
@@ -121,10 +143,14 @@ export class Start extends Phaser.Scene {
         this.scene.launch('UI');
         const uiScene = this.scene.get('UI');
         uiScene.events.on('rolarDado', this.rolarDado, this);
+        uiScene.events.on('uiPronta', () => {
+            this.events.emit('updateTurno', this.jogadorAtualIndex, this.pontuacoes, this.movimentosRestantes);
+        })
+        
     }
     
     update(){
-        if (this.playerPosition && this.movimentosRestantes > 0){
+        if (this.playerPositions[this.jogadorAtualIndex] && this.movimentosRestantes > 0){
             if(Phaser.Input.Keyboard.JustDown(this.cursors.left)){
                 this.move(-1, 0);
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){
@@ -139,34 +165,35 @@ export class Start extends Phaser.Scene {
 
     //movimentação teclado
     move(x, y){
-        const novoX = (this.playerPosition.x + x + this.tamanhoColunas) % this.tamanhoColunas;
-        const novoY = this.playerPosition.y + y;
+        const posAtual = this.playerPositions[this.jogadorAtualIndex];//pega as posições do jogador do turno
+        const novoX = (posAtual.x + x + this.tamanhoColunas) % this.tamanhoColunas;
+        const novoY = posAtual.y + y;
         if(novoX >= 0 && novoX < this.tamanhoColunas && novoY >= 0 && novoY < this.tamanhoLinhas){
             //custo de movimento
             let custo = 1;
 
             if (y === 0){
-                const linhaAtual = this.playerPosition.y;
-                if (linhaAtual >= 3 && linhaAtual <= 5){
+                if (posAtual.y >= 3 && posAtual.y <= 5){
                     custo = 2;
-                }else if (linhaAtual >= 6){
+                }else if (posAtual.y >= 6){
                     custo = 3;
                 }
             }
 
             if (this.movimentosRestantes >= custo) {
                 // só move se tiver movimentos suficientes
-                this.playerPosition.x = novoX;
-                this.playerPosition.y = novoY;
+                posAtual.x = novoX;
+                posAtual.y = novoY;
 
-                this.player.x = this.playerPosition.x * this.tamanhoCelula + this.tamanhoCelula / 2;
-                this.player.y = this.playerPosition.y * this.tamanhoCelula + this.tamanhoCelula / 2;
+                const playerSprite = this.players[this.jogadorAtualIndex];
+                playerSprite.x = posAtual.x * this.tamanhoCelula + this.tamanhoCelula / 2;
+                playerSprite.y = posAtual.y * this.tamanhoCelula + this.tamanhoCelula / 2;
                 this.movimentosRestantes -= custo;
                 //pontuação
-                const tipo = this.tabuleiroPontos[this.playerPosition.y][this.playerPosition.x];
+                const tipo = this.tabuleiroPontos[posAtual.y][posAtual.x];
 
                 if (tipo === 'buraco'){//se o jogador cair na casa do buraco, ele morre
-                    this.gameOver();
+                    this.eliminaJogador(this.jogadorAtualIndex);
                     return;
                 }
 
@@ -174,9 +201,9 @@ export class Start extends Phaser.Scene {
                 if (tipo === 'terra' || tipo === 'nave'){
                     pontos = 4;
                 }else if (tipo === 'planeta'){
-                    if (this.playerPosition.y <= 2){
+                    if (posAtual.y <= 2){
                         pontos = 1;
-                    }else if (this.playerPosition.y <= 5){
+                    }else if (posAtual.y <= 5){
                         pontos = 2;
                     }else{
                         pontos = 3;
@@ -184,16 +211,20 @@ export class Start extends Phaser.Scene {
                 }
 
                 if (pontos > 0){
-                    this.movimentosRestantes = 0;
-                    this.pontuacao += pontos;
-                    const marcador = this.marcadoresVisuais[this.playerPosition.y][this.playerPosition.x];
+                    this.pontuacoes[this.jogadorAtualIndex] += pontos;
+                    const marcador = this.marcadoresVisuais[posAtual.y][posAtual.x];
                     if (marcador) {
                         marcador.destroy();//removendo elemento capturado
-                        this.marcadoresVisuais[this.playerPosition.y][this.playerPosition.x] = null;
+                        this.marcadoresVisuais[posAtual.y][posAtual.x] = null;
                     }
-                    this.tabuleiroPontos[this.playerPosition.y][this.playerPosition.x] = 0;
+                    this.tabuleiroPontos[posAtual.y][posAtual.x] = 0;
                 }
-                this.events.emit('updateUI', this.movimentosRestantes, this.pontuacao);
+                if (pontos > 0 || this.movimentosRestantes === 0){
+                    this.proximoJogador();
+                }else {
+                    this.events.emit('updateTurno', this.jogadorAtualIndex, this.pontuacoes, this.movimentosRestantes);
+                }
+                
             } 
         }
     }
@@ -203,40 +234,37 @@ export class Start extends Phaser.Scene {
         //virando posição na grade/matriz
         const gridX = Math.floor(pointer.x / this.tamanhoCelula);//coordenada do clique / tamanho das celulas =
         const gridY = Math.floor(pointer.y / this.tamanhoCelula);// coordenada em # das celulas
-        
+        const posAtual = this.playerPositions[this.jogadorAtualIndex];
         //verificando se ta dentro do tabuleiro
         if(gridX >= 0 && gridX < this.tamanhoColunas && gridY >= 0 && gridY < this.tamanhoLinhas){
             //primeiro movimento
-            if(!this.playerPosition){
-                if(this.movimentosRestantes > 0 && gridY === 0){
-                    this.playerPosition = {x: gridX, y: gridY};
-                    this.player = this.add.circle(
-                        gridX * this.tamanhoCelula + this.tamanhoCelula / 2,
-                        gridY * this.tamanhoCelula + this.tamanhoCelula / 2,
-                        this.tamanhoCelula / 4,
-                        0x00d1b2
-                    );
-                    this.movimentosRestantes--;
-                    this.events.emit('updateUI', this.movimentosRestantes, this.pontuacao);
+            if(posAtual){
+                if(this.movimentosRestantes > 0){
+                    const difX = gridX - posAtual.x;
+                    const difY = gridY - posAtual.y;
+                    const isAdjacente = (Math.abs(difX) === 1 && difY === 0) || (difX === 0 && Math.abs(difY) === 1) || (Math.abs(difX) === this.tamanhoColunas - 1 && difY === 0);
+                    if (isAdjacente) {
+                        this.move(difX, difY);
+                    }
                 }
-                return;
-            }
+            } else {
+                if (this.movimentosRestantes > 0 && gridY === 0) {
+                    this.playerPositions[this.jogadorAtualIndex] = {x: gridX, y: gridY};
+                    const playerSprite = this.players[this.jogadorAtualIndex];
+                    playerSprite.setPosition(
+                        gridX * this.tamanhoCelula + this.tamanhoCelula / 2,
+                        gridY * this.tamanhoCelula + this.tamanhoCelula / 2
+                    );
+                    playerSprite.setVisible(true);
+                    console.log('estado jogador na entrada', playerSprite);
+                    this.movimentosRestantes--;
 
-            if(this.movimentosRestantes === 0) return;
-            //movimento normal, pós primeiro
-            const difX = gridX - this.playerPosition.x;
-            const difY = gridY - this.playerPosition.y;
-
-            const distanciaX = Math.abs(difX);
-            const distanciaY = Math.abs(difY);
-
-            //checando se a distância é de 1 casa apenas e não pode andar na diagonal
-            const isAdjacente = (distanciaX === 1 && distanciaY === 0) ||
-                                (distanciaX === 0 && distanciaY === 1) ||
-                                (distanciaX === this.tamanhoColunas - 1 && distanciaY === 0);
-
-            if(isAdjacente){
-                this.move(difX, difY);
+                    if (this.movimentosRestantes === 0){
+                        this.proximoJogador();
+                    }else{
+                        this.events.emit('updateTurno', this.jogadorAtualIndex, this.pontuacoes, this.movimentosRestantes);
+                    }
+                }
             }
         }
     }
@@ -244,23 +272,52 @@ export class Start extends Phaser.Scene {
     rolarDado(){
         if (this.movimentosRestantes === 0){
             this.movimentosRestantes = Phaser.Math.Between(1,6);
-            this.events.emit('updateUI', this.movimentosRestantes, this.pontuacao);
+            this.events.emit('updateTurno', this.jogadorAtualIndex, this.pontuacoes, this.movimentosRestantes);
         }
         
     }
 
-    gameOver(){
+    proximoJogador(){
+        this.movimentosRestantes = 0;
+        let proximoIndex = (this.jogadorAtualIndex + 1) % this.numeroDeJogadores;
+
+        //procurando o prox jogador ativo
+        while (!this.jogadoresAtivos[proximoIndex] && proximoIndex !== this.jogadorAtualIndex){
+            proximoIndex = (proximoIndex + 1) % this.numeroDeJogadores; 
+        }
+        this.jogadorAtualIndex = proximoIndex;
+        this.events.emit('updateTurno', this.jogadorAtualIndex, this.pontuacoes, this.movimentosRestantes);
+    }
+
+    eliminaJogador(index){
+        this.jogadoresAtivos[index] = false;
+        const playerSprite = this.players[index];
+
         this.tweens.add({
-            targets: this.player,
+            targets: playerSprite,
             alpha: 0,
-            scale: 2,
+            scale: 0,
             duration: 500,
-            ease: 'Power2',
-            onComplete: () => {
-                this.scene.stop('UI');
-                this.scene.start('GameOver');//para a cena com os botões etc 
-                                            // e inicia a cena de fim de jogo
-            }
+            ease: 'Power2'
+        });
+
+        //checa se sobrou só 1
+        const jogadoresRestantes = this.jogadoresAtivos.filter(ativo => ativo).length;
+        if (jogadoresRestantes <= 1){
+            const vencedorIndex = this.jogadoresAtivos.findIndex(ativo => ativo === true);
+            this.gameOver(this.jogadoresAtivos.findIndex(ativo => ativo === true));
+        } else {
+            this.proximoJogador();
+        }
+        
+
+    }
+
+    gameOver(vencedorIndex){
+        this.scene.stop('UI');
+        this.scene.start('GameOver', {
+            vencedor: vencedorIndex,
+            pontuacao: vencedorIndex > -1 ? this.pontuacoes[vencedorIndex] : 0
         });
     }
 }
