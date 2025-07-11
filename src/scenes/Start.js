@@ -12,7 +12,7 @@ export class Start extends Phaser.Scene {
         this.tamanhoLinhas = 9;
         this.tamanhoCelula = 100;
 
-        this.numeroDeJogadores = 2;//número de jogadores
+        this.numeroDeJogadores = 3;//número de jogadores
         this.jogadorAtualIndex = 0;//começa com o primeiro jogador
         this.movimentosRestantes = 0;
 
@@ -271,7 +271,7 @@ export class Start extends Phaser.Scene {
 
     rolarDado(){
         if (this.movimentosRestantes === 0){
-            this.movimentosRestantes = Phaser.Math.Between(1,6);
+            this.movimentosRestantes = 6;//Phaser.Math.Between(1,6);
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.pontuacoes, this.movimentosRestantes);
         }
         
@@ -305,12 +305,10 @@ export class Start extends Phaser.Scene {
         const jogadoresRestantes = this.jogadoresAtivos.filter(ativo => ativo).length;
         if (jogadoresRestantes <= 1){
             const vencedorIndex = this.jogadoresAtivos.findIndex(ativo => ativo === true);
-            this.gameOver(this.jogadoresAtivos.findIndex(ativo => ativo === true));
+            this.gameOver(vencedorIndex);
         } else {
             this.proximoJogador();
         }
-        
-
     }
 
     gameOver(vencedorIndex){
