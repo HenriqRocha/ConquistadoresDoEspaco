@@ -20,11 +20,15 @@ export class Start extends Phaser.Scene {
         this.players = [];
         const playersColors = [0x00d1b2, 0xff8800, 0xde3163, 0x8e44ad];
 
+
+
         //inicializando os dados dos jogadores
         for (let i = 0; i < this.numeroDeJogadores; i++){
-            const jogador = new Player(this, i, playersColors[i], 100);
+            const jogador = new Player(this, i, playersColors[i], 60);
             jogador.sprite.setPosition(this.tabuleiro.centroX, this.tabuleiro.centroY).setVisible(true);
+            jogador.position = {linha: 0, coluna: 0 };   
             this.players.push(jogador);
+               
         }
 
         
@@ -43,10 +47,11 @@ export class Start extends Phaser.Scene {
     }
     
     update(){//não sei se ta dando certo ainda
-        if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0){
+        if (/*this.players[this.jogadorAtualIndex].position && */this.movimentosRestantes > 0){
             if(Phaser.Input.Keyboard.JustDown(this.cursors.left)){
                 this.move('anti-horario');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){
+                console.log('horario');
                 this.move('horario');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.up)){
                 this.move('dentro');
@@ -63,7 +68,8 @@ export class Start extends Phaser.Scene {
     //movimentação teclado
     move(direcao) {
         const jogadorAtual = this.players[this.jogadorAtualIndex];
-        if (!jogadorAtual.position) return; // Jogador ainda não entrou no jogo.
+        console.log(jogadorAtual.position);
+        if (!jogadorAtual.position) return;// Jogador ainda não entrou no jogo.
 
         let { linha, coluna } = jogadorAtual.position;
         let novaLinha = linha;
