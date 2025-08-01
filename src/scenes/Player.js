@@ -13,23 +13,21 @@ export class Player {
     }
 
 
-    entraNoJogo(x, y){
-        this.position = {x, y};
-        this.sprite.setPosition(
-            x * this.scene.tamanhoCelula + this.scene.tamanhoCelula / 2,
-            y * this.scene.tamanhoCelula + this.scene.tamanhoCelula / 2
-        );
+    entraNoJogo(linha, coluna){
+        this.position = {linha, coluna};
+        const pos = this.scene.tabuleiro.getXY(linha, coluna);
+        this.sprite.setPosition(pos.x, pos.y);
         this.sprite.setVisible(true);
     }
 
 
-    playerMove(x, y){
+    playerMove(linha, coluna){
         if(!this.position) return;
 
-        this.position.x = x;
-        this.position.y = y;
-        this.sprite.x = x * this.scene.tamanhoCelula + this.scene.tamanhoCelula / 2;
-        this.sprite.y = y * this.scene.tamanhoCelula + this.scene.tamanhoCelula / 2;
+        this.position.linha = linha;
+        this.position.coluna = coluna;
+        const pos = this.scene.tabuleiro.getXY(linha, coluna);
+        this.sprite.setPosition(pos.x, pos.y);
     }
 
     somaPontos(pts){

@@ -1,4 +1,5 @@
 import { Player } from './Player.js';
+import { Tabuleiro } from './Tabuleiro.js';
 
 export class Start extends Phaser.Scene {
 
@@ -9,10 +10,9 @@ export class Start extends Phaser.Scene {
     preload() {}
 
     create() {
-        //tamanhos tabuleiro e casas
-        this.tamanhoColunas = 12;
-        this.tamanhoLinhas = 9;
-        this.tamanhoCelula = 100;
+        this.tabuleiro = new Tabuleiro(this);
+        this.tabuleiro.iniciaTabuleiro();
+
         this.numeroDeJogadores = 3;//número de jogadores
         this.jogadorAtualIndex = 0;//começa com o primeiro jogador
         this.movimentosRestantes = 0;
@@ -22,112 +22,15 @@ export class Start extends Phaser.Scene {
 
         //inicializando os dados dos jogadores
         for (let i = 0; i < this.numeroDeJogadores; i++){
-            const jogador = new Player(this, i, playersColors[i], this.tamanhoCelula);
+            const jogador = new Player(this, i, playersColors[i], 100);
+            jogador.sprite.setPosition(this.tabuleiro.centroX, this.tabuleiro.centroY).setVisible(true);
             this.players.push(jogador);
         }
 
         
-        //array para guardar os elementos 'pontuáveis'
-        this.tabuleiroPontos = Array.from({ length: this.tamanhoLinhas }, () => Array(this.tamanhoColunas).fill(0));
-        //array para colocar os elementos visuais
-        this.marcadoresVisuais = Array.from({ length: this.tamanhoLinhas }, () => Array(this.tamanhoColunas).fill(null));
-        
-
-        //elementos e suas posições no tabuleiro para serem resgatados
-        this.tabuleiroPontos[3][4] = 'terra'; // Planeta Terra
-        this.tabuleiroPontos[8][10] = 'nave'; // Nave alienígena
-        this.tabuleiroPontos[0][1] = 'planeta';
-        this.tabuleiroPontos[1][3] = 'planeta';
-        this.tabuleiroPontos[2][5] = 'planeta';
-        this.tabuleiroPontos[0][9] = 'planeta';
-        this.tabuleiroPontos[2][2] = 'planeta';
-        this.tabuleiroPontos[3][6] = 'planeta';
-        this.tabuleiroPontos[4][3] = 'planeta';
-        this.tabuleiroPontos[5][7] = 'planeta';
-        this.tabuleiroPontos[3][0] = 'planeta';
-        this.tabuleiroPontos[5][2] = 'planeta';
-        this.tabuleiroPontos[6][8] = 'planeta';
-        this.tabuleiroPontos[7][5] = 'planeta';
-        this.tabuleiroPontos[8][1] = 'planeta';
-        this.tabuleiroPontos[6][0] = 'planeta';
-        this.tabuleiroPontos[8][6] = 'planeta';
-
-        //buracos negros
-        this.tabuleiroPontos[6][5] = 'buraco';
-        this.tabuleiroPontos[8][3] = 'buraco';
-        this.tabuleiroPontos[5][1] = 'buraco';
-
-        //criando o tabuleiro
-        for (let linha = 0; linha < this.tamanhoLinhas; linha++){
-            for (let col = 0; col < this.tamanhoColunas; col++){
-                this.add.rectangle(
-                    col * this.tamanhoCelula + this.tamanhoCelula /2,
-                    linha * this.tamanhoCelula + this.tamanhoCelula /2,
-                    this.tamanhoCelula - 2,
-                    this.tamanhoCelula - 2,
-                    0x555555
-                ).setStrokeStyle(2,0xffffff);   
-            }
-        }
-
-    //criando visualmente os objetivos e obstáculos 
-    for (let y = 0; y < this.tamanhoLinhas; y++) {
-        this.marcadoresVisuais[y] = [];
-
-        for (let x = 0; x < this.tamanhoColunas; x++) {
-            const tipo = this.tabuleiroPontos[y][x];
-            let marcador = null;
-
-            if (tipo === 'terra') {
-                marcador = this.add.circle(
-                    x * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    y * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    this.tamanhoCelula / 4,
-                    0x0000ff
-                );
-            } else if (tipo === 'nave') {
-                marcador = this.add.star(
-                    x * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    y * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    5, 15, 30,
-                    0xffff00
-                );
-            } else if (tipo === 'planeta') {
-                marcador = this.add.circle(
-                    x * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    y * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    this.tamanhoCelula / 6,
-                    0x00ff00
-                );
-            } else if (tipo == 'buraco'){
-                marcador = this.add.circle(
-                    x * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    y * this.tamanhoCelula + this.tamanhoCelula / 2,
-                    this.tamanhoCelula / 2.5,
-                    0x480d6a
-                );
-            }
-
-            this.marcadoresVisuais[y][x] = marcador;
-        }
-    }
-
-        //marcação zonas
-        const corDivisao = 0xff0000;
-        const yLinha4 = 3 * this.tamanhoCelula;
-        const yLinha7 = 6 * this.tamanhoCelula;
-
-        this.add.line(
-            0, yLinha4, 0, 0, this.tamanhoColunas * this.tamanhoCelula, 0,corDivisao
-        ).setOrigin(0, 0).setLineWidth(4)
-
-        this.add.line(
-            0, yLinha7, 0, 0, this.tamanhoColunas * this.tamanhoCelula, 0,corDivisao
-        ).setOrigin(0, 0).setLineWidth(4)
-
         //inputs de movimento
         this.cursors = this.input.keyboard.createCursorKeys();//setinhas teclado
-        this.input.on('pointerdown', this.moveMouse, this);//clique do mouse
+        //this.input.on('pointerdown', this.moveMouse, this);//clique do mouse
 
         //comunicação cenas
         this.scene.launch('UI');
@@ -139,88 +42,78 @@ export class Start extends Phaser.Scene {
         
     }
     
-    update(){
+    update(){//não sei se ta dando certo ainda
         if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0){
             if(Phaser.Input.Keyboard.JustDown(this.cursors.left)){
-                this.move(-1, 0);
+                this.move('anti-horario');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){
-                this.move(1, 0);
+                this.move('horario');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.up)){
-                this.move(0, -1);
+                this.move('dentro');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.down)){
-                this.move(0, 1);
+                this.move('fora');
             }
         }
     }
 
-    isOcupado(x, y){
-        return this.players.some(p => p.position && p.position.x === x && p.position.y === y);
+    isOcupado(linha, coluna){
+        return this.players.some(p => p.position && p.position.linha === linha && p.position.coluna === coluna);
     }
 
     //movimentação teclado
-    move(x, y){
-        const jogadorAtual = this.players[this.jogadorAtualIndex];//pega as posições do jogador do turno
-        const novoX = (jogadorAtual.position.x + x + this.tamanhoColunas) % this.tamanhoColunas;
-        const novoY = jogadorAtual.position.y + y;
-        if (this.isOcupado(novoX, novoY)) return;
+    move(direcao) {
+        const jogadorAtual = this.players[this.jogadorAtualIndex];
+        if (!jogadorAtual.position) return; // Jogador ainda não entrou no jogo.
 
-        if(novoX >= 0 && novoX < this.tamanhoColunas && novoY >= 0 && novoY < this.tamanhoLinhas){
-            //custo de movimento
-            let custo = 1;
+        let { linha, coluna } = jogadorAtual.position;
+        let novaLinha = linha;
+        let novaColuna = coluna;
 
-            if (y === 0){
-                if (jogadorAtual.position.y >= 3 && jogadorAtual.position.y <= 5){
-                    custo = 2;
-                }else if (jogadorAtual.position.y >= 6){
-                    custo = 3;
-                }
+        //posição na lógica
+        switch(direcao) {
+            case 'dentro': novaLinha--; break;
+            case 'fora': novaLinha++; break;
+            case 'anti-horario': novaColuna = (coluna - 1 + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas; break;
+            case 'horario': novaColuna = (coluna + 1) % this.tabuleiro.numeroDeColunas; break;
+        }
+
+        //checa movimento possivel
+        if (novaLinha < 0 || novaLinha >= this.tabuleiro.numeroDeLinhas) return;
+        if (this.isOcupado(novaLinha, novaColuna)) return;
+
+        //custo de acordo com zonas
+        const custo = (novaLinha >= 5) ? 3 : (novaLinha >= 2) ? 2 : 1;
+        
+        if (this.movimentosRestantes >= custo) {
+            jogadorAtual.playerMove(novaLinha, novaColuna);
+            this.movimentosRestantes -= custo;
+            
+            //checando objeto na casa
+            const tipo = this.tabuleiro.getItem(novaLinha, novaColuna);
+            if (tipo === 'buraco') { 
+                this.eliminaJogador(this.jogadorAtualIndex); 
+                return; 
             }
 
-            if (this.movimentosRestantes >= custo) {
-                // só move se tiver movimentos suficientes
-                jogadorAtual.playerMove(novoX, novoY);
-                this.movimentosRestantes -= custo;
-                //pontuação
-                const tipo = this.tabuleiroPontos[jogadorAtual.position.y][jogadorAtual.position.x];
+            let pontos = 0;
+            if (tipo === 'terra' || tipo === 'nave') { pontos = 4; }
+            else if (tipo === 'planeta') {
+                //pontuaçao dos planetas de acordo com zona também
+                pontos = (novaLinha >= 5) ? 3 : (novaLinha >= 2) ? 2 : 1;
+            }
 
-                if (tipo === 'buraco'){//se o jogador cair na casa do buraco, ele morre
-                    this.eliminaJogador(this.jogadorAtualIndex);
-                    return;
-                }
-
-                let pontos = 0;
-                if (tipo === 'terra' || tipo === 'nave'){
-                    pontos = 4;
-                }else if (tipo === 'planeta'){
-                    if (jogadorAtual.position.y <= 2){
-                        pontos = 1;
-                    }else if (jogadorAtual.position.y <= 5){
-                        pontos = 2;
-                    }else{
-                        pontos = 3;
-                    }
-                }
-
-                if (pontos > 0){
-                    jogadorAtual.somaPontos(pontos);
-                    const marcador = this.marcadoresVisuais[novoY][novoX];
-                    if (marcador) {
-                        marcador.destroy();//removendo elemento capturado
-                        this.marcadoresVisuais[jogadorAtual.position.y][jogadorAtual.position.x] = null;
-                    }
-                    this.tabuleiroPontos[novoY][novoX] = 0;
-                }
-                if (pontos > 0 || this.movimentosRestantes === 0){
-                    this.proximoJogador();
-                }else {
-                    this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
-                }
-                
-            } 
+            if (pontos > 0) {
+                jogadorAtual.somaPontos(pontos);
+                this.tabuleiro.removeItem(novaLinha, novaColuna);
+            }
+            
+            if (pontos > 0 || this.movimentosRestantes === 0) { this.proximoJogador(); }
+            else { this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes); }
         }
     }
 
     //movimentação mouse
+    /* ainda não sei direito como posso fazer isso da melhor forma
     moveMouse(pointer){
         //virando posição na grade/matriz
         const gridX = Math.floor(pointer.x / this.tamanhoCelula);//coordenada do clique / tamanho das celulas =
@@ -254,6 +147,7 @@ export class Start extends Phaser.Scene {
             }
         }
     }
+    */
 
     rolarDado(){
         if (this.movimentosRestantes === 0){
@@ -293,7 +187,7 @@ export class Start extends Phaser.Scene {
         const pontuacaoVencedor = vencedorIndex > -1 ? this.players[vencedorIndex].pontos : 0
         this.scene.start('GameOver', {
             vencedor: vencedorIndex,
-            pontuacao: vencedorIndex > -1 ? this.players[vencedorIndex].pontos : 0
+            pontuacao: pontuacaoVencedor
         });
     }
 
