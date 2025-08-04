@@ -25,8 +25,7 @@ export class Start extends Phaser.Scene {
         //inicializando os dados dos jogadores
         for (let i = 0; i < this.numeroDeJogadores; i++){
             const jogador = new Player(this, i, playersColors[i], 60);
-            jogador.sprite.setPosition(this.tabuleiro.centroX, this.tabuleiro.centroY).setVisible(true);
-            jogador.position = {linha: 0, coluna: 0 };   
+            jogador.sprite.setPosition(this.tabuleiro.centroX, this.tabuleiro.centroY).setVisible(true);   
             this.players.push(jogador);
                
         }
@@ -34,7 +33,7 @@ export class Start extends Phaser.Scene {
         
         //inputs de movimento
         this.cursors = this.input.keyboard.createCursorKeys();//setinhas teclado
-        //this.input.on('pointerdown', this.moveMouse, this);//clique do mouse
+        this.input.on('pointerdown', this.moveMouse, this);//clique do mouse
 
         //comunicação cenas
         this.scene.launch('UI');
@@ -46,16 +45,19 @@ export class Start extends Phaser.Scene {
         
     }
     
-    update(){//não sei se ta dando certo ainda
-        if (/*this.players[this.jogadorAtualIndex].position && */this.movimentosRestantes > 0){
+    update(){
+        if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0){
             if(Phaser.Input.Keyboard.JustDown(this.cursors.left)){
+                console.log('anti-horario');
                 this.move('anti-horario');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){
                 console.log('horario');
                 this.move('horario');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.up)){
+                console.log('dentro');
                 this.move('dentro');
             } else if(Phaser.Input.Keyboard.JustDown(this.cursors.down)){
+                console.log('fora');
                 this.move('fora');
             }
         }
@@ -88,7 +90,16 @@ export class Start extends Phaser.Scene {
         if (this.isOcupado(novaLinha, novaColuna)) return;
 
         //custo de acordo com zonas
-        const custo = (novaLinha >= 5) ? 3 : (novaLinha >= 2) ? 2 : 1;
+        let custo = 1;
+        if (direcao === 'horario' || direcao === 'anti-horario'){
+            const linhaAtual = jogadorAtual.position.linha;
+            if (linhaAtual >= 5){
+                custo = 3;
+            }
+            else if (linhaAtual >= 2){
+                custo = 2;
+            }
+        }
         
         if (this.movimentosRestantes >= custo) {
             jogadorAtual.playerMove(novaLinha, novaColuna);
@@ -119,41 +130,65 @@ export class Start extends Phaser.Scene {
     }
 
     //movimentação mouse
-    /* ainda não sei direito como posso fazer isso da melhor forma
     moveMouse(pointer){
-        //virando posição na grade/matriz
-        const gridX = Math.floor(pointer.x / this.tamanhoCelula);//coordenada do clique / tamanho das celulas =
-        const gridY = Math.floor(pointer.y / this.tamanhoCelula);// coordenada em # das celulas
         const jogadorAtual = this.players[this.jogadorAtualIndex];
-        //verificando se ta dentro do tabuleiro
-        if(gridX >= 0 && gridX < this.tamanhoColunas && gridY >= 0 && gridY < this.tamanhoLinhas){
-            //primeiro movimento
-            if(jogadorAtual.position){
-                if(this.movimentosRestantes > 0){
-                    const difX = gridX - jogadorAtual.position.x;
-                    const difY = gridY - jogadorAtual.position.y;
-                    const isAdjacente = (Math.abs(difX) === 1 && difY === 0) || (difX === 0 && Math.abs(difY) === 1) || (Math.abs(difX) === this.tamanhoColunas - 1 && difY === 0);
-                    if (isAdjacente) {
-                        this.move(difX, difY);
-                    }
-                }
-            } else {
-                if (this.movimentosRestantes > 0 && gridY === 0) {
-                    if (this.isOcupado(gridX, gridY)) return
+        if (this.movimentosRestantes <= 0) return;
 
-                    jogadorAtual.entraNoJogo(gridX, gridY)
-                    this.movimentosRestantes--;
+        //primeiro movimento
+        if (!jogadorAtual.position) {
+            //distância do centro para o clique para saber a linha correspondente
+            const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
+            const linha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
+            
+            //se o clique foi no primeiro anel (linha 0) é possível
+            if (linha === 0) {
+                //agora calcula o ângulo
+                const angulo = Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.tabuleiro.centroX, this.tabuleiro.centroY, pointer.x, pointer.y));
+                const anguloPositivo = angulo < 0 ? angulo + 360 : angulo;//se o angulo for negativo a conta da coluna n vai funcionar
+                const coluna = Math.round(anguloPositivo / (360 / this.tabuleiro.numeroDeColunas)) % this.tabuleiro.numeroDeColunas;
 
-                    if (this.movimentosRestantes === 0){
-                        this.proximoJogador();
-                    }else{
-                        this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
-                    }
+                //checagem de jogador
+                if (this.isOcupado(linha, coluna)) return;
+
+                //realizando o movimento
+                jogadorAtual.entraNoJogo(linha, coluna);
+                this.movimentosRestantes--;
+                
+                if (this.movimentosRestantes === 0) {
+                    this.proximoJogador();
+                } else {
+                    this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
                 }
             }
         }
+        else {
+            const posAtual = jogadorAtual.position;
+
+            //pegando distancia do clique e convertendo em linha alvo
+            const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
+            const targetLinha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
+            //mesma coisa com a coluna
+            const angulo = Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.tabuleiro.centroX, this.tabuleiro.centroY, pointer.x, pointer.y));
+            const anguloPositivo = angulo < 0 ? angulo + 360 : angulo;
+            const targetColuna = Math.round(anguloPositivo / (360 / this.tabuleiro.numeroDeColunas)) % this.tabuleiro.numeroDeColunas;
+
+            //verificando se é adjacente
+            const deltaLinha = targetLinha - posAtual.linha;
+            const deltaColuna = targetColuna - posAtual.coluna;
+
+            //circularidade entre colunas
+            const isAdjacentColuna = Math.abs(deltaColuna) === 1 || Math.abs(deltaColuna) === this.tabuleiro.numeroDeColunas - 1;
+            const isAdjacent = (Math.abs(deltaLinha) === 1 && deltaColuna === 0) || (deltaLinha === 0 && isAdjacentColuna);
+
+            if (isAdjacent) {
+                // 3. Se for adjacente, determina a direção e chama a função move.
+                if (deltaLinha === 1) this.move('fora');
+                else if (deltaLinha === -1) this.move('dentro');
+                else if (deltaColuna === 1 || deltaColuna === -(this.tabuleiro.numeroDeColunas - 1)) this.move('horario');
+                else if (deltaColuna === -1 || deltaColuna === this.tabuleiro.numeroDeColunas - 1) this.move('anti-horario');
+            }
+        }
     }
-    */
 
     rolarDado(){
         if (this.movimentosRestantes === 0){
