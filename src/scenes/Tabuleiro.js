@@ -3,12 +3,22 @@ export class Tabuleiro {
     constructor(scene){
         this.scene = scene;
 
+        //área do jogdador e cálculo para área de jogo
+        const larguraPainelLateral = 300;
+        const larguraTabuleiro = scene.scale.width - larguraPainelLateral;
+        const alturaTabuleiro = scene.scale.height;
+
+        //definindo centro do tabuleiro
+        this.centroX = larguraPainelLateral + (larguraTabuleiro / 2);
+        this.centroY = alturaTabuleiro / 2;
+
+        //definindo raio
+        const raioMaximo = Math.min(larguraTabuleiro / 2, alturaTabuleiro / 2) * 0.95;
+
         //caracteristicas tabuleiro
-        this.centroX = scene.scale.width / 2;
-        this.centroY = scene.scale.height / 2 - 50;
         this.numeroDeLinhas = 9;
         this.numeroDeColunas = 12;
-        this.distanciaEntreAneis = 60;
+        this.distanciaEntreAneis = raioMaximo / this.numeroDeLinhas;
 
         //arrays de ponto
         this.tabuleiroPontos = Array.from({ length: this.numeroDeLinhas }, () => Array(this.numeroDeColunas).fill(0));
@@ -20,11 +30,11 @@ export class Tabuleiro {
 
     preencher(){
         this.tabuleiroPontos[6][0] = 'terra';
-        this.tabuleiroPontos[0][6] = 'nave';
-        this.tabuleiroPontos[1][3] = 'planeta';
+        this.tabuleiroPontos[3][6] = 'nave';
+        this.tabuleiroPontos[1][6] = 'planeta';
         this.tabuleiroPontos[3][1] = 'planeta';
         this.tabuleiroPontos[5][4] = 'planeta';
-        this.tabuleiroPontos[0][2] = 'planeta';
+        this.tabuleiroPontos[1][2] = 'planeta';
         this.tabuleiroPontos[5][5] = 'buraco';
         this.tabuleiroPontos[2][9] = 'buraco';
         this.tabuleiroPontos[4][7] = 'planeta';
@@ -80,8 +90,8 @@ export class Tabuleiro {
         }
 
         //divisão de zonas
-        this.scene.add.circle(this.centroX, this.centroY, 2.5 * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
-        this.scene.add.circle(this.centroX, this.centroY, 5.5 * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
+        this.scene.add.circle(this.centroX, this.centroY, 3.5 * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
+        this.scene.add.circle(this.centroX, this.centroY, 6.5 * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
     }
 
     mostraItens(){

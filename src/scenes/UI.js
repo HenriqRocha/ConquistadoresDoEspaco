@@ -9,30 +9,49 @@ export class UI extends Phaser.Scene {
         //pega a cena do start para 'ouvir' os eventos
         const gameScene = this.scene.get('Start');
 
+        //painel lateral
+        const larguraPainel = 300;
+        const padding = 20;
+        let atualY = 50;//para empilhar os elementos
+
+        //separação
+        this.add.graphics()
+            .lineStyle(2, 0xffffff, 0.5)
+            .lineBetween(larguraPainel, 0, larguraPainel, this.cameras.main.height);
+
         //botões e textos para o usuário
-        this.textoJogadorAtual = this.add.text(10, 920, 'Aguardando...', {
+        this.textoJogadorAtual = this.add.text(padding, atualY, 'Aguardando...', {
             fontSize: '28px', fill: '#ffffff'
         });
+        atualY += 40;
 
-        this.textoMovimento = this.add.text(10,950, 'Movimentos: 0',
+        this.textoMovimento = this.add.text(padding,atualY, 'Movimentos: 0',
         {fontSize: '24px',
         fill: '#ffffff'});
-
-        this.textosPontuacao = [];
-        for (let i = 0; i < gameScene.numeroDeJogadores; i++){
-            const texto = this.add.text(600 + (i * 250), 950, `Jogador ${i + 1}: 0`,{
-                fontSize: '24px', fill: 'ffffff'
-            });
-            this.textosPontuacao.push(texto);
-        }
+        atualY += 80;
 
         //criando botão na tela
-        this.botaoDado = this.add.text(900, 950, 'Rolar Dado',{
+        this.botaoDado = this.add.text(larguraPainel / 2, atualY, 'Rolar Dado',{
             fontSize: '24px',
             fill:'#ffffff',
             backgroundColor: '#222222',
             padding: {x: 10, y: 5}
-        }).setInteractive();
+        }).setOrigin(0.5).setInteractive();
+        atualY += 100;
+
+        //título pontuação
+        this.add.text(padding, atualY, 'Pontuações', {fontSize: '26px', fill: '#ffffff'});
+        atualY += 40;
+
+        this.textosPontuacao = [];
+        for (let i = 0; i < gameScene.numeroDeJogadores; i++){
+            const texto = this.add.text(padding, atualY, `Jogador ${i + 1}: 0`,{
+                fontSize: '24px', fill: '#ffffff'
+            });
+            this.textosPontuacao.push(texto);
+            atualY += 35;
+        }
+
 
         //lê o clique do mouse e avisa o start para a fc rolar dado
         this.botaoDado.on('pointerdown', () => {
