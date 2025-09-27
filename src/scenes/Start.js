@@ -13,6 +13,17 @@ export class Start extends Phaser.Scene {
         this.tabuleiro = new Tabuleiro(this);
         this.tabuleiro.iniciaTabuleiro();
 
+        //contando objetos de pontuação
+        this.objetosDePontuacaoRestantes = 0;
+        this.tabuleiro.tabuleiroPontos.forEach(linha => {
+            linha.forEach(item => {
+                if (item === 'planeta' || item === 'terra' || item === 'nave'){
+                    this.objetosDePontuacaoRestantes++;
+                }
+            });
+        });
+        console.log(`objetos de pontos no tabuleiro: ${this.objetosDePontuacaoRestantes}`);
+
         this.numeroDeJogadores = 3;//número de jogadores
         this.jogadorAtualIndex = 0;//começa com o primeiro jogador
         this.movimentosRestantes = 0;
@@ -71,7 +82,7 @@ export class Start extends Phaser.Scene {
     }
     
     update(){
-        if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0 && this.estadoTurno === 'MOVENDO'){
+        if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0 && (this.estadoTurno === 'MOVENDO' || this.estadoTurno === 'DESEMPATE')){
             if(Phaser.Input.Keyboard.JustDown(this.cursors.left)){
                 console.log('anti-horario');
                 this.move('anti-horario');
@@ -105,6 +116,19 @@ export class Start extends Phaser.Scene {
         if (!jogadorAtual.position) return;// Jogador ainda não entrou no jogo.
 
         let { linha, coluna } = jogadorAtual.position;
+
+        if(this.estadoTurno === 'DESEMPATE' && direcao === 'dentro' && linha === 0){
+            console.log(`${this.movimentosRestantes}`);
+            if(this.movimentosRestantes >= 1){
+                console.log(`${jogadorAtual.id + 1} voltou ao centro e venceu`);
+                jogadorAtual.retornaAoCentro();
+                this.gameOver(jogadorAtual.id);
+            }else{
+                console.log('movimentos insuficientes para voltar ao centro');
+            }
+            return;
+        }
+
         let novaLinha = linha;
         let novaColuna = coluna;
 
@@ -222,6 +246,13 @@ export class Start extends Phaser.Scene {
         if(pontos > 0){
             jogadorAtual.somaPontos(pontos);
             this.tabuleiro.removeItem(linha, coluna);
+
+            this.objetosDePontuacaoRestantes--;
+            console.log(`restam ${this.objetosDePontuacaoRestantes} objetos de pontuação restantes`);
+            if (this.objetosDePontuacaoRestantes <= 0){
+                this.testaFimDeJogo();
+                return;
+            }
         }
 
         if(pontos > 0 || this.movimentosRestantes <= 0){
@@ -233,11 +264,14 @@ export class Start extends Phaser.Scene {
 
     //movimentação mouse
     moveMouse(pointer){
-        if (this.movimentosRestantes <= 0 || (this.estadoTurno !== 'MOVENDO' && this.estadoTurno !== 'AGUARDANDO_JOGADA' && this.players[this.jogadorAtualIndex].position)) return;
         const jogadorAtual = this.players[this.jogadorAtualIndex];
 
         //primeiro movimento
         if (!jogadorAtual.position) {
+            if(this.movimentosRestantes <= 0 || this.estadoTurno !== 'MOVENDO'){
+                return;
+            }
+
             //distância do centro para o clique para saber a linha correspondente
             const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
             const linha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
@@ -252,48 +286,63 @@ export class Start extends Phaser.Scene {
                 //checagem de jogador
                 if (this.isOcupado(linha, coluna)) return;
 
-                this.estadoTurno = 'MOVENDO';
-
                 //realizando o movimento
                 jogadorAtual.entraNoJogo(linha, coluna);
                 this.movimentosRestantes--;
                 
                 this.verificarCasaEContinuar(linha, coluna);
             }
+            return;
         }
-        else {
-            const posAtual = jogadorAtual.position;
+        
+        if (this.movimentosRestantes <= 0 || (this.estadoTurno !== 'MOVENDO' && this.estadoTurno !== 'DESEMPATE')){
+            return;
+        }
+        
+        
+        const posAtual = jogadorAtual.position;
 
-            //pegando distancia do clique e convertendo em linha alvo
-            const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
-            const targetLinha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
-            //mesma coisa com a coluna
-            const angulo = Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.tabuleiro.centroX, this.tabuleiro.centroY, pointer.x, pointer.y));
-            const anguloPositivo = angulo < 0 ? angulo + 360 : angulo;
-            const targetColuna = Math.round(anguloPositivo / (360 / this.tabuleiro.numeroDeColunas)) % this.tabuleiro.numeroDeColunas;
+        //pegando distancia do clique e convertendo em linha alvo
+        const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
+        const targetLinha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
 
-            //verificando se é adjacente
-            const deltaLinha = targetLinha - posAtual.linha;
-            const deltaColuna = targetColuna - posAtual.coluna;
+        // Se estiver no desempate, na linha 0, e o clique for para dentro (targetLinha < 0)
+        if (this.estadoTurno === 'DESEMPATE' && posAtual.linha === 0 && targetLinha < 0) {
+            // Chamamos a função move('dentro'), que já tem a lógica para terminar o jogo.
+            this.move('dentro');
+            return; // Fim da jogada.
+        }
 
-            //circularidade entre colunas
-            const isAdjacentColuna = Math.abs(deltaColuna) === 1 || Math.abs(deltaColuna) === this.tabuleiro.numeroDeColunas - 1;
-            const isAdjacent = (Math.abs(deltaLinha) === 1 && deltaColuna === 0) || (deltaLinha === 0 && isAdjacentColuna);
+        //mesma coisa com a coluna
+        const angulo = Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.tabuleiro.centroX, this.tabuleiro.centroY, pointer.x, pointer.y));
+        const anguloPositivo = angulo < 0 ? angulo + 360 : angulo;
+        const targetColuna = Math.round(anguloPositivo / (360 / this.tabuleiro.numeroDeColunas)) % this.tabuleiro.numeroDeColunas;
 
-            if (isAdjacent) {
-                // 3. Se for adjacente, determina a direção e chama a função move.
-                if (deltaLinha === 1) this.move('fora');
-                else if (deltaLinha === -1) this.move('dentro');
-                else if (deltaColuna === 1 || deltaColuna === -(this.tabuleiro.numeroDeColunas - 1)) this.move('horario');
-                else if (deltaColuna === -1 || deltaColuna === this.tabuleiro.numeroDeColunas - 1) this.move('anti-horario');
-            }
+        //verificando se é adjacente
+        const deltaLinha = targetLinha - posAtual.linha;
+        const deltaColuna = targetColuna - posAtual.coluna;
+        //circularidade entre colunas
+        const isAdjacentColuna = Math.abs(deltaColuna) === 1 || Math.abs(deltaColuna) === this.tabuleiro.numeroDeColunas - 1;
+        const isAdjacent = (Math.abs(deltaLinha) === 1 && deltaColuna === 0) || (deltaLinha === 0 && isAdjacentColuna);
+
+        if (isAdjacent) {
+            // 3. Se for adjacente, determina a direção e chama a função move.
+            if (deltaLinha === 1) this.move('fora');
+            else if (deltaLinha === -1) this.move('dentro');
+            else if (deltaColuna === 1 || deltaColuna === -(this.tabuleiro.numeroDeColunas - 1)) this.move('horario');
+            else if (deltaColuna === -1 || deltaColuna === this.tabuleiro.numeroDeColunas - 1) this.move('anti-horario');
         }
     }
 
+
     rolarDado(){
-        if (this.movimentosRestantes === 0 && this.estadoTurno === 'AGUARDANDO_JOGADA'){
+        if (this.movimentosRestantes === 0 && (this.estadoTurno === 'AGUARDANDO_JOGADA' || this.estadoTurno === 'DESEMPATE')){
             this.movimentosRestantes = Phaser.Math.Between(1,6);
-            this.estadoTurno = 'MOVENDO';
+            
+            if(this.estadoTurno === 'AGUARDANDO_JOGADA'){
+                this.estadoTurno = 'MOVENDO';
+            }
+
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
         }
         
@@ -301,12 +350,26 @@ export class Start extends Phaser.Scene {
 
     proximoJogador(){
         this.movimentosRestantes = 0;
-        this.estadoTurno = 'AGUARDANDO_JOGADA';
+        if(this.estadoTurno !== 'DESEMPATE'){
+            this.estadoTurno = 'AGUARDANDO_JOGADA';   
+        }
         let proximoIndex = (this.jogadorAtualIndex + 1) % this.numeroDeJogadores;
 
-        //procurando o prox jogador ativo
-        while (!this.players[proximoIndex].isAtivo && proximoIndex !== this.jogadorAtualIndex){
-            proximoIndex = (proximoIndex + 1) % this.numeroDeJogadores; 
+        let tentativas = 0;
+        while(tentativas < this.numeroDeJogadores){
+            const proximoJogador = this.players[proximoIndex];
+            //encontrando jogador valido no desempate
+            if(this.estadoTurno === 'DESEMPATE'){
+                if(proximoJogador.isAtivo && this.jogadoresNoDesempate.includes(proximoJogador.id)){
+                    break;
+                }
+            }else{ //lógica normal
+                if(proximoJogador.isAtivo){
+                    break;
+                }
+            }
+            proximoIndex = (proximoIndex + 1) % this.numeroDeJogadores;
+            tentativas++;
         }
         this.jogadorAtualIndex = proximoIndex;
         this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
@@ -321,6 +384,30 @@ export class Start extends Phaser.Scene {
             const vencedorIndex = this.players.findIndex(p => p.isAtivo === true);
             this.gameOver(vencedorIndex);
         } else {
+            this.proximoJogador();
+        }
+    }
+
+    testaFimDeJogo(){
+        const jogadoresAtivos = this.players.filter(p => p.isAtivo);
+        const pontuacaoMaxima = Math.max(...jogadoresAtivos.map(p => p.pontos));
+        const jogadoresEmpatados = jogadoresAtivos.filter(p => p.pontos === pontuacaoMaxima);
+
+        if(jogadoresEmpatados.length === 1){
+            //vencedor claro
+            this.gameOver(jogadoresEmpatados[0].id);
+        } else{//empate
+            console.log(`empate com ${pontuacaoMaxima} pontos`);
+            this.estadoTurno = 'DESEMPATE';
+            this.jogadoresNoDesempate = jogadoresEmpatados.map(p => p.id)//guarda quem concorre o desempate
+            //eliminando jogadores que não estão empatados
+            this.players.forEach(jogador =>{
+                if(jogador.isAtivo && !this.jogadoresNoDesempate.includes(jogador.id)){
+                    jogador.elimina();
+                }
+            })
+
+            this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), 0, 'EMPATE! O PRIMEIRO A VOLTAR PARA O CENTRO VENCE!');
             this.proximoJogador();
         }
     }

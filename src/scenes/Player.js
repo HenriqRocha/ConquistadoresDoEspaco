@@ -34,6 +34,11 @@ export class Player {
         this.pontos += pts;
     }
 
+    retornaAoCentro(){
+        this.position = null;
+        this.sprite.setPosition(this.scene.tabuleiro.centroX, this.scene.tabuleiro.centroY);
+    }
+
     elimina(){
         this.isAtivo = false;
         this.scene.tweens.add({
