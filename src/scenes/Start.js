@@ -266,71 +266,76 @@ export class Start extends Phaser.Scene {
     moveMouse(pointer){
         const jogadorAtual = this.players[this.jogadorAtualIndex];
 
-        //primeiro movimento
+        //primeira jogada
         if (!jogadorAtual.position) {
-            if(this.movimentosRestantes <= 0 || this.estadoTurno !== 'MOVENDO'){
+            if (this.movimentosRestantes <= 0 || this.estadoTurno !== 'MOVENDO') {
                 return;
             }
 
-            //distância do centro para o clique para saber a linha correspondente
-            const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
-            const linha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
-            
-            //se o clique foi no primeiro anel (linha 0) é possível
-            if (linha === 0) {
-                //agora calcula o ângulo
-                const angulo = Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.tabuleiro.centroX, this.tabuleiro.centroY, pointer.x, pointer.y));
-                const anguloPositivo = angulo < 0 ? angulo + 360 : angulo;//se o angulo for negativo a conta da coluna n vai funcionar
-                const coluna = Math.round(anguloPositivo / (360 / this.tabuleiro.numeroDeColunas)) % this.tabuleiro.numeroDeColunas;
+            // 1. Definir os 12 pontos de entrada possíveis (toda a linha 0)
+            const pontosDeEntrada = [];
+            for (let i = 0; i < this.tabuleiro.numeroDeColunas; i++) {
+                pontosDeEntrada.push({ linha: 0, coluna: i });
+            }
 
-                //checagem de jogador
-                if (this.isOcupado(linha, coluna)) return;
+            // 2. Calcular a posição (x,y) de cada ponto e a sua distância ao clique
+            const pontosComDistancia = pontosDeEntrada.map(ponto => {
+                const pos = this.tabuleiro.getXY(ponto.linha, ponto.coluna);
+                const distancia = Phaser.Math.Distance.Between(pointer.x, pointer.y, pos.x, pos.y);
+                return { ...ponto, distancia };
+            });
 
-                //realizando o movimento
-                jogadorAtual.entraNoJogo(linha, coluna);
+            // 3. Encontrar o ponto de entrada com a menor distância
+            const pontoMaisProximo = pontosComDistancia.reduce(
+                (maisProximo, atual) => (atual.distancia < maisProximo.distancia ? atual : maisProximo)
+            );
+
+            // 4. Se o clique foi perto o suficiente e a casa não está ocupada, entra no jogo
+            if (pontoMaisProximo.distancia < this.tabuleiro.distanciaEntreAneis * 0.75) {
+                if (this.isOcupado(pontoMaisProximo.linha, pontoMaisProximo.coluna)) return;
+
+                jogadorAtual.entraNoJogo(pontoMaisProximo.linha, pontoMaisProximo.coluna);
                 this.movimentosRestantes--;
-                
-                this.verificarCasaEContinuar(linha, coluna);
+                this.verificarCasaEContinuar(pontoMaisProximo.linha, pontoMaisProximo.coluna);
             }
             return;
         }
         
-        if (this.movimentosRestantes <= 0 || (this.estadoTurno !== 'MOVENDO' && this.estadoTurno !== 'DESEMPATE')){
+        // CASO 2: O JOGADOR JÁ ESTÁ NO TABULEIRO (JOGADAS NORMAIS)
+        if (this.movimentosRestantes <= 0 || (this.estadoTurno !== 'MOVENDO' && this.estadoTurno !== 'DESEMPATE')) {
             return;
         }
-        
-        
-        const posAtual = jogadorAtual.position;
 
-        //pegando distancia do clique e convertendo em linha alvo
-        const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
-        const targetLinha = Math.round(dist / this.tabuleiro.distanciaEntreAneis) - 1;
-
-        // Se estiver no desempate, na linha 0, e o clique for para dentro (targetLinha < 0)
-        if (this.estadoTurno === 'DESEMPATE' && posAtual.linha === 0 && targetLinha < 0) {
-            // Chamamos a função move('dentro'), que já tem a lógica para terminar o jogo.
-            this.move('dentro');
-            return; // Fim da jogada.
+        // Se estiver no desempate na linha 0, verifica se o clique foi para o centro
+        if (this.estadoTurno === 'DESEMPATE' && jogadorAtual.position.linha === 0) {
+            const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, this.tabuleiro.centroX, this.tabuleiro.centroY);
+            if (dist < this.tabuleiro.distanciaEntreAneis / 2) {
+                this.move('dentro');
+                return;
+            }
         }
 
-        //mesma coisa com a coluna
-        const angulo = Phaser.Math.RadToDeg(Phaser.Math.Angle.Between(this.tabuleiro.centroX, this.tabuleiro.centroY, pointer.x, pointer.y));
-        const anguloPositivo = angulo < 0 ? angulo + 360 : angulo;
-        const targetColuna = Math.round(anguloPositivo / (360 / this.tabuleiro.numeroDeColunas)) % this.tabuleiro.numeroDeColunas;
+        // Lógica dos vizinhos (esta parte já estava correta)
+        const { linha, coluna } = jogadorAtual.position;
+        const vizinhos = [
+            { direcao: 'fora', linha: linha + 1, coluna: coluna },
+            { direcao: 'dentro', linha: linha - 1, coluna: coluna },
+            { direcao: 'horario', linha: linha, coluna: (coluna + 1) % this.tabuleiro.numeroDeColunas },
+            { direcao: 'anti-horario', linha: linha, coluna: (coluna - 1 + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas }
+        ];
 
-        //verificando se é adjacente
-        const deltaLinha = targetLinha - posAtual.linha;
-        const deltaColuna = targetColuna - posAtual.coluna;
-        //circularidade entre colunas
-        const isAdjacentColuna = Math.abs(deltaColuna) === 1 || Math.abs(deltaColuna) === this.tabuleiro.numeroDeColunas - 1;
-        const isAdjacent = (Math.abs(deltaLinha) === 1 && deltaColuna === 0) || (deltaLinha === 0 && isAdjacentColuna);
+        const vizinhosComDistancia = vizinhos.map(vizinho => {
+            const pos = this.tabuleiro.getXY(vizinho.linha, vizinho.coluna);
+            const distancia = Phaser.Math.Distance.Between(pointer.x, pointer.y, pos.x, pos.y);
+            return { ...vizinho, distancia };
+        });
 
-        if (isAdjacent) {
-            // 3. Se for adjacente, determina a direção e chama a função move.
-            if (deltaLinha === 1) this.move('fora');
-            else if (deltaLinha === -1) this.move('dentro');
-            else if (deltaColuna === 1 || deltaColuna === -(this.tabuleiro.numeroDeColunas - 1)) this.move('horario');
-            else if (deltaColuna === -1 || deltaColuna === this.tabuleiro.numeroDeColunas - 1) this.move('anti-horario');
+        const vizinhoMaisProximo = vizinhosComDistancia.reduce(
+            (maisProximo, atual) => (atual.distancia < maisProximo.distancia ? atual : maisProximo)
+        );
+
+        if (vizinhoMaisProximo.distancia < this.tabuleiro.distanciaEntreAneis * 0.75) {
+            this.move(vizinhoMaisProximo.direcao);
         }
     }
 
