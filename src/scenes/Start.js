@@ -215,6 +215,7 @@ export class Start extends Phaser.Scene {
                 break;
             }
             case 'PERDE_MOVIMENTO_RESTANTE':
+                this.verificarCasaEContinuar(jogadorAtual.position.linha, jogadorAtual.position.coluna);
                 this.movimentosRestantes = 0;
                 this.proximoJogador();
                 return;
