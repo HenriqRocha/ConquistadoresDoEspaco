@@ -7,7 +7,15 @@ export class Start extends Phaser.Scene {
         super('Start');
     }
 
-    preload() {}
+    preload() {
+        for(let i = 0; i < 26; i++)
+        {
+            if(i < 9)
+                this.load.image(`sun00${i + 1}`, `assets/planetas/sun00${i + 1}.png`);
+            else
+                this.load.image(`sun0${i + 1}`, `assets/planetas/sun0${i + 1}.png`);
+        }
+    }
 
     create() {
         this.tabuleiro = new Tabuleiro(this);

@@ -82,7 +82,7 @@ export class Tabuleiro {
                 this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
             }
             //circulos brancos
-            this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(1, 0xffffff, 0.5). setDepth(0);
+            this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);
         }
 
         const raioMaximo = this.numeroDeLinhas * this.distanciaEntreAneis;
@@ -95,6 +95,8 @@ export class Tabuleiro {
     }
 
     mostraItens(){
+
+        let planetas = 0; // para controlar as imagens dos planetas e não extrapolar a quantidade que temos (26)
         for (let linha = 0; linha < this.numeroDeLinhas; linha++){
             for (let coluna = 0; coluna < this.numeroDeColunas; coluna++){
                 const tipo = this.getItem(linha, coluna);
@@ -110,7 +112,12 @@ export class Tabuleiro {
                     marcador = this.scene.add.star(pos.x, pos.y, 5, 10, 20, 0xffff00);
                 }
                 else if(tipo === 'planeta'){
-                    marcador = this.scene.add.circle(pos.x, pos.y, 15, 0x00ff00);
+                    //marcador = this.scene.add.circle(pos.x, pos.y, 15, 0x00ff00);
+                    planetas++;
+                    if(planetas < 10)
+                        marcador = this.scene.add.image(pos.x, pos.y, `sun00${planetas}`);
+                    else
+                        marcador = this.scene.add.image(pos.x, pos.y, `sun0${planetas}`);
                 }
                 else if (tipo === 'buraco'){
                     marcador = this.scene.add.circle(pos.x, pos.y, 25, 0x480d6a);

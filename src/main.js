@@ -7,7 +7,7 @@ const config = {
     parent: 'game-container',
     width: 1200,
     height: 1000,
-    backgroundColor: '#000000',
+    backgroundColor: '#0E0E45',
     scene: [
         Start,
         UI,
