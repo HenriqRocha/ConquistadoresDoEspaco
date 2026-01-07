@@ -16,7 +16,7 @@ export class Tabuleiro {
         const raioMaximo = Math.min(larguraTabuleiro / 2, alturaTabuleiro / 2) * 0.95;
 
         //caracteristicas tabuleiro
-        this.numeroDeLinhas = 9;
+        this.numeroDeLinhas = 12;
         this.numeroDeColunas = 12;
         this.distanciaEntreAneis = raioMaximo / this.numeroDeLinhas;
 
@@ -76,8 +76,12 @@ export class Tabuleiro {
     }
 
     desenhaTabuleiro(){
-        //desenha os circulos brancos
+        //desenha os circulos
         for(let i = 0; i < this.numeroDeLinhas; i++){
+            if (i == 3 || i == 7){//circulos de zonas
+                this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
+            }
+            //circulos brancos
             this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(1, 0xffffff, 0.5). setDepth(0);
         }
 
@@ -88,10 +92,6 @@ export class Tabuleiro {
             const y = this.centroY + raioMaximo * Math.sin(angulo);
             this.scene.add.line(0, 0, this.centroX, this.centroY, x, y, 0xffffff, 0.5).setOrigin(0).setDepth(0);
         }
-
-        //divisão de zonas
-        this.scene.add.circle(this.centroX, this.centroY, 3.5 * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
-        this.scene.add.circle(this.centroX, this.centroY, 6.5 * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
     }
 
     mostraItens(){

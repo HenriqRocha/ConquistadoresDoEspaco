@@ -105,13 +105,14 @@ export class Start extends Phaser.Scene {
 
     getZona(linha) {
         if (linha <= 2) return 1; // Zona 1 (0, 1, 2)
-        if (linha <= 5) return 2; // Zona 2 (3, 4, 5)
+        if (linha <= 6) return 2; // Zona 2 (3, 4, 5)
         return 3;                 // Zona 3 (6, 7, 8)
     }
 
     //movimentação teclado
     move(direcao) {
         const jogadorAtual = this.players[this.jogadorAtualIndex];
+        const linhaAtual = jogadorAtual.position.linha;
         console.log(jogadorAtual.position);
         if (!jogadorAtual.position) return;// Jogador ainda não entrou no jogo.
 
@@ -143,15 +144,19 @@ export class Start extends Phaser.Scene {
         //checa movimento possivel
         if (novaLinha < 0 || novaLinha >= this.tabuleiro.numeroDeLinhas) return;
         if (this.isOcupado(novaLinha, novaColuna)) return;
+        if ((linhaAtual == 3 || linhaAtual == 7) && (direcao == 'horario' || direcao == 'anti-horario')){
+            console.log('não é possível mover-se lateralmente nas divisões de zonas');
+            return;
+        }
+
 
         //custo de acordo com zonas
         let custo = 1;
         if (direcao === 'horario' || direcao === 'anti-horario'){
-            const linhaAtual = jogadorAtual.position.linha;
-            if (linhaAtual >= 6){
+            if (this.getZona(linhaAtual) == 3){
                 custo = 3;
             }
-            else if (linhaAtual >= 3){
+            else if (this.getZona(linhaAtual) == 2){
                 custo = 2;
             }
         }
@@ -316,7 +321,7 @@ export class Start extends Phaser.Scene {
             }
         }
 
-        // Lógica dos vizinhos (esta parte já estava correta)
+        // Lógica dos vizinhos
         const { linha, coluna } = jogadorAtual.position;
         const vizinhos = [
             { direcao: 'fora', linha: linha + 1, coluna: coluna },
