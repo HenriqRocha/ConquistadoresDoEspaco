@@ -109,6 +109,7 @@ export class Tabuleiro {
                     marcador = this.scene.add.circle(pos.x, pos.y, 20, 0x0000ff);
                 }
                 else if(tipo === 'nave'){
+                    //marcador = this.scene.add.image(pos.x, pos.y, 'nave001');
                     marcador = this.scene.add.star(pos.x, pos.y, 5, 10, 20, 0xffff00);
                 }
                 else if(tipo === 'planeta'){
@@ -120,7 +121,7 @@ export class Tabuleiro {
                         marcador = this.scene.add.image(pos.x, pos.y, `sun0${planetas}`);
                 }
                 else if (tipo === 'buraco'){
-                    marcador = this.scene.add.circle(pos.x, pos.y, 25, 0x480d6a);
+                    marcador = this.scene.add.image(pos.x, pos.y, `buracoNegro`);
                 }
 
                 if (marcador){

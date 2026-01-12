@@ -15,6 +15,13 @@ export class Start extends Phaser.Scene {
             else
                 this.load.image(`sun0${i + 1}`, `assets/planetas/sun0${i + 1}.png`);
         }
+
+        for(let i = 1; i <= 5; i++)
+        {
+            this.load.image(`nave00${i}`, `assets/naves/nave00${i}.png`);
+        }
+
+        this.load.image('buracoNegro', `assets/buracoNegro/buracoNegro.png`);
     }
 
     create() {
