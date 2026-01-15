@@ -310,5 +310,3 @@ Além do clique no botão, a classe configura um listener para a tecla `ESPAÇO`
 ### 5. Notas de Implementação
 
 *   **Escopo:** A cena é iniciada via `this.scene.launch('UI')` a partir da `Start.js`, o que permite que ambas processem lógica simultaneamente sem que uma interrompa a outra.
-*   **Robustez:** O loop de atualização de pontuações possui uma verificação de segurança (`if (this.textosPontuacao[i])`) para evitar erros caso o número de jogadores mude dinamicamente.
-*   **Estética:** Utiliza preenchimentos (`padding`) e origens centralizadas para garantir que os botões tenham uma área de clique confortável e visualmente equilibrada.
