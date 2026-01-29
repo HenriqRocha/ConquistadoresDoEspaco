@@ -63,6 +63,13 @@ export class UI extends Phaser.Scene {
             this.events.emit('rolarDado')
         });
 
+        this.overlay = this.add.rectangle(
+        this.cameras.main.centerX, 
+        this.cameras.main.centerY, 
+        this.cameras.main.width, 
+        this.cameras.main.height, 
+        0x000000, 0.7).setVisible(false).setDepth(90);   
+
         //comunicação cenas
         gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
             this.textoJogadorAtual.setText(`Vez do jogador ${jogadorIndex + 1}`);
@@ -75,5 +82,74 @@ export class UI extends Phaser.Scene {
             }
         });
         this.events.emit('uiPronta');
+
+        gameScene.events.on('exibirCarta', (dadosCarta)=>{
+            this.ativarEfeitoCarta(dadosCarta.imagem, gameScene);
+        })
+    }
+
+    //animação carta
+    ativarEfeitoCarta(nomeDaCarta, gameScene) {
+        if (this.cartaEmExibicao) return;
+
+        const centroX = this.cameras.main.width / 2;
+        const centroY = this.cameras.main.height / 2;
+
+        this.overlay.setVisible(true);
+        
+        // Desativa interações para evitar bugs durante a animação
+        this.botaoDado.disableInteractive().setAlpha(0.5);
+
+        const carta = this.add.sprite(centroX, this.cameras.main.height + 300, nomeDaCarta)
+            .setScale(0.5)
+            .setAlpha(0)
+            .setDepth(100);
+
+        const botaoOk = this.add.text(centroX, this.cameras.main.height + 500, 'ENTENDIDO', {
+            fontSize: '24px',
+            fill: '#ffffff',
+            backgroundColor: '#00d1b2',
+            padding: { x: 20, y: 10 },
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101).setAlpha(0);
+
+        this.cartaEmExibicao = carta;
+        this.botaoOkEmExibicao = botaoOk;
+
+        this.tweens.add({
+            targets: [carta, botaoOk],
+            y: (target) => target === carta ? centroY - 40 : centroY + 420,
+            alpha: 1,
+            scale: (target) => target === carta ? 1 : 1,
+            duration: 700,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                botaoOk.setInteractive().on('pointerdown',()=>{
+                    this.fecharCarta(gameScene);
+                });
+            }
+        });
+    }
+
+    fecharCarta(gameScene){
+        this.tweens.add({
+            targets: [this.cartaEmExibicao, this.botaoOkEmExibicao],
+            y: this.cameras.main.height + 500,
+            alpha: 0,
+            duration: 700,
+            ease: 'Power2',
+            onComplete: ()=>{
+                this.overlay.setVisible(false);
+                this.botaoDado.setInteractive().setAlpha(1);
+                
+                if (this.cartaEmExibicao){this.cartaEmExibicao.destroy();}
+                if (this.botaoOkExibicao){this.botaoOkExibicao.destroy();}
+                
+                this.cartaEmExibicao = null;
+                this.botaoOkExibicao = null;
+
+                gameScene.events.emit('cartaFechada');
+            }
+        });
     }
 }

@@ -30,7 +30,7 @@ export class Tabuleiro {
 
     preencher(){
         this.tabuleiroPontos[6][0] = 'terra';
-        this.tabuleiroPontos[3][6] = 'nave';
+        this.tabuleiroPontos[6][6] = 'nave';
         this.tabuleiroPontos[1][6] = 'planeta';
         this.tabuleiroPontos[3][1] = 'planeta';
         this.tabuleiroPontos[5][4] = 'planeta';

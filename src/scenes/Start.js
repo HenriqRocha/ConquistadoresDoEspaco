@@ -22,6 +22,19 @@ export class Start extends Phaser.Scene {
         }
 
         this.load.image('buracoNegro', `assets/buracoNegro/buracoNegro.png`);
+
+        this.load.path = 'assets/cartas/';
+
+        const nomesCartas = [
+            'campoAtrator', 'giroAnti-horario120', 'giroAnti-horario150', 'giroAnti-horario180',
+            'giroAnti-horario30', 'giroAnti-horario60', 'giroAnti-horario90', 'giroHorario120',
+            'giroHorario150', 'giroHorario180', 'giroHorario30', 'giroHorario60', 'giroHorario90',
+            'leveTurbulencia', 'reflexaoNaRetaR1', 'reflexaoNaRetaR4'
+        ]
+
+        nomesCartas.forEach(nome =>{
+            this.load.image(nome, `${nome}.png`);
+        });
     }
 
     create() {
@@ -47,25 +60,26 @@ export class Start extends Phaser.Scene {
         //baralho de eventos
         this.baralhoDeEventos = [
             // Giros (30 graus = 1 coluna, 60 = 2, etc.)
-            { titulo: 'Giro Horário 30°', descricao: 'Você entrou em um campo magnético fortíssimo. Gire a nave em 30° no sentido horário para recuperar o controle.', efeito: 'GIRO', valor: 1 },
-            { titulo: 'Giro Anti-Horário 30°', descricao: 'Você entrou em um campo magnético fortíssimo. Gire a nave em 30° no sentido anti-horário para recuperar o controle.', efeito: 'GIRO', valor: -1 },
-            { titulo: 'Giro Horário 60°', descricao: 'Utilizando um estilingue gravitacional, sua nave se moveu 60° no sentido horário.', efeito: 'GIRO', valor: 2 },
-            { titulo: 'Giro Anti-Horário 60°', descricao: 'Utilizando um estilingue gravitacional, sua nave se moveu 60° no sentido anti-horário.', efeito: 'GIRO', valor: -2 },
-            { titulo: 'Giro Anti-Horário 90°', descricao: 'Uma chuva de meteoros obriga sua nave a manobrar! Mova 90° no sentido anti-horário para escapar.', efeito: 'GIRO', valor: -3 },
-            { titulo: 'Giro Horário 120°', descricao: 'Uma estrela super gigante azul surge em seu trajeto. Gire em 120° no sentido horário para evitar seu calor intenso!', efeito: 'GIRO', valor: 4 },
-            { titulo: 'Giro Anti-Horário 120°', descricao: 'Uma estrela super gigante azul surge em seu trajeto. Gire em 120° no sentido anti-horário para evitar seu calor intenso!', efeito: 'GIRO', valor: -4 },
-            { titulo: 'Giro Horário 150°', descricao: 'A radiação de um pulsar está fritando os instrumentos. Mova sua nave 150° no sentido horário!', efeito: 'GIRO', valor: 5 },
-            { titulo: 'Giro Anti-Horário 150°', descricao: 'A radiação de um pulsar está fritando os instrumentos. Mova sua nave 150° no sentido anti-horário!', efeito: 'GIRO', valor: -5 },
-            { titulo: 'Giro Horário 180°', descricao: 'Uma pane na nave impediu a detecção de um buraco negro. Para sobreviver mova sua nave em 180° no sentido horário.', efeito: 'GIRO', valor: 6 },
-            { titulo: 'Giro Anti-Horário 180°', descricao: 'Uma pane na nave impediu a detecção de um buraco negro. Para sobreviver mova sua nave em 180° no sentido anti-horário.', efeito: 'GIRO', valor: -6 },
+            { titulo: 'Giro Horário 30°', imagem: 'giroHorario30', efeito: 'GIRO', valor: 1 },
+            { titulo: 'Giro Anti-Horário 30°', imagem: 'giroAnti-horario30', efeito: 'GIRO', valor: -1 },
+            { titulo: 'Giro Horário 60°', imagem: 'giroHorario60', efeito: 'GIRO', valor: 2 },
+            { titulo: 'Giro Anti-Horário 60°', imagem: 'giroAnti-horario60', efeito: 'GIRO', valor: -2 },
+            { titulo: 'Giro Horário 90°', imagem: 'giroHorario90', efeito: 'GIRO', valor: 3 },
+            { titulo: 'Giro Anti-Horário 90°', imagem: 'giroAnti-horario90', efeito: 'GIRO', valor: -3 },
+            { titulo: 'Giro Horário 120°', imagem: 'giroHorario120', efeito: 'GIRO', valor: 4 },
+            { titulo: 'Giro Anti-Horário 120°', imagem: 'giroAnti-horario120', efeito: 'GIRO', valor: -4 },
+            { titulo: 'Giro Horário 150°', imagem: 'giroHorario150', efeito: 'GIRO', valor: 5 },
+            { titulo: 'Giro Anti-Horário 150°', imagem: 'giroAnti-horario150', efeito: 'GIRO', valor: -5 },
+            { titulo: 'Giro Horário 180°', imagem: 'giroHorario180', efeito: 'GIRO', valor: 6 },
+            { titulo: 'Giro Anti-Horário 180°', imagem: 'giroAnti-horario180', efeito: 'GIRO', valor: -6 },
             
             // Reflexões (R1 = Eixo Vertical, R4 = Eixo Horizontal, pode ser ajustado)
-            { titulo: 'Reflexão na Reta R1', descricao: 'Aproveitando a gravidade de um planeta próximo sua nave ganhou um forte impulso! Vá para a posição refletida em relação a reta R1.', efeito: 'REFLEXAO', valor: 'R1' },
-            { titulo: 'Reflexão na Reta R4', descricao: 'Um buraco de minhoca surgiu, mandando sua nave para a posição refletida em relação a reta R4.', efeito: 'REFLEXAO', valor: 'R4' },
+            { titulo: 'Reflexão na Reta R1', imagem: 'reflexaoNaRetaR1', efeito: 'REFLEXAO', valor: 'R1' },
+            { titulo: 'Reflexão na Reta R4', imagem: 'reflexaoNaRetaR4', efeito: 'REFLEXAO', valor: 'R4' },
             
             // Efeitos de Jogo
-            { titulo: 'Campo Atrator', descricao: 'Uma força desconhecida prendeu sua nave nesta posição... Perca o restante da sua movimentação.', efeito: 'PERDE_MOVIMENTO_RESTANTE' },
-            { titulo: 'Leve Turbulência', descricao: 'Sua nave ficou cercada por um campo magnético potente, mas parece não afetar sua nave. Prossiga o caminho como planejado.', efeito: 'NENHUM_EFEITO' }
+            { titulo: 'Campo Atrator', imagem: 'campoAtrator', efeito: 'PERDE_MOVIMENTO_RESTANTE' },
+            { titulo: 'Leve Turbulência', imagem: 'leveTurbulencia', efeito: 'NENHUM_EFEITO' }
         ];
 
         this.players = [];
@@ -93,6 +107,14 @@ export class Start extends Phaser.Scene {
         uiScene.events.on('uiPronta', () => {
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
         })
+        this.events.on('cartaFechada', ()=>{
+            console.log('animação da carta terminou')
+
+            const jogadorAtual = this.players[this.jogadorAtualIndex];
+
+            this.estadoTurno = 'MOVENDO';
+            this.verificarCasaEContinuar(jogadorAtual.position.linha, jogadorAtual.position.coluna);
+        });
         
     }
     
@@ -201,7 +223,7 @@ export class Start extends Phaser.Scene {
 
         console.log(`%c--- EVENTO DE ZONA ---`, 'color: yellow; font-weight: bold;');
         console.log(`Jogador ${this.jogadorAtualIndex + 1} sorteou: ${cartaSorteada.titulo}`);
-        console.log(`"${cartaSorteada.descricao}"`);
+        this.events.emit('exibirCarta', cartaSorteada);
 
         switch(cartaSorteada.efeito){
             case 'GIRO':{
@@ -235,18 +257,12 @@ export class Start extends Phaser.Scene {
                 break;
             }
             case 'PERDE_MOVIMENTO_RESTANTE':
-                this.verificarCasaEContinuar(jogadorAtual.position.linha, jogadorAtual.position.coluna);
                 this.movimentosRestantes = 0;
-                this.proximoJogador();
-                return;
+                break;
 
             case 'NENHUM_EFEITO':
                 break;
-        }
-
-        console.log('------------------');
-        this.estadoTurno = 'MOVENDO';
-        this.verificarCasaEContinuar(jogadorAtual.position.linha, jogadorAtual.position.coluna);        
+        }      
     }
 
     verificarCasaEContinuar(linha, coluna){
