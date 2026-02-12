@@ -10,9 +10,9 @@ export class UI extends Phaser.Scene {
         const gameScene = this.scene.get('Start');
 
         //painel lateral
-        const larguraPainel = 300;
-        const padding = 20;
-        let atualY = 50;//para empilhar os elementos
+        const larguraPainel = 200;
+        const padding = 15;
+        let atualY = 40;//para empilhar os elementos
 
         //separação
         this.add.graphics()
@@ -21,18 +21,18 @@ export class UI extends Phaser.Scene {
 
         //botões e textos para o usuário
         this.textoJogadorAtual = this.add.text(padding, atualY, 'Aguardando...', {
-            fontSize: '28px', fill: '#ffffff'
+            fontSize: '20px', fill: '#ffffff'
         });
-        atualY += 40;
+        atualY += 60;
 
-        this.textoMovimento = this.add.text(padding,atualY, 'Movimentos: 0',
-        {fontSize: '24px',
+        this.textoMovimento = this.add.text(padding, atualY, 'Movimentos: 0',
+        {fontSize: '18px',
         fill: '#ffffff'});
         atualY += 80;
 
         //criando botão na tela
         this.botaoDado = this.add.text(larguraPainel / 2, atualY, 'Rolar Dado',{
-            fontSize: '24px',
+            fontSize: '18px',
             fill:'#ffffff',
             backgroundColor: '#222222',
             padding: {x: 10, y: 5}
@@ -40,13 +40,13 @@ export class UI extends Phaser.Scene {
         atualY += 100;
 
         //título pontuação
-        this.add.text(padding, atualY, 'Pontuações', {fontSize: '26px', fill: '#ffffff'});
+        this.add.text(padding, atualY, 'Pontuações', {fontSize: '20px', fill: '#ffffff', fontStyle: 'bold'});
         atualY += 40;
 
         this.textosPontuacao = [];
         for (let i = 0; i < gameScene.numeroDeJogadores; i++){
             const texto = this.add.text(padding, atualY, `Jogador ${i + 1}: 0`,{
-                fontSize: '24px', fill: '#ffffff'
+                fontSize: '18px', fill: '#ffffff'
             });
             this.textosPontuacao.push(texto);
             atualY += 35;
@@ -72,7 +72,7 @@ export class UI extends Phaser.Scene {
 
         //comunicação cenas
         gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
-            this.textoJogadorAtual.setText(`Vez do jogador ${jogadorIndex + 1}`);
+            this.textoJogadorAtual.setText(`Jogador atual:\n      ${jogadorIndex + 1}`);
             this.textoMovimento.setText('Movimentos: ' + movimentos);
 
             for (let i = 0; i < pontuacoes.length; i++) {

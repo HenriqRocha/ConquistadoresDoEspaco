@@ -4,7 +4,7 @@ export class Tabuleiro {
         this.scene = scene;
 
         //área do jogdador e cálculo para área de jogo
-        const larguraPainelLateral = 300;
+        const larguraPainelLateral = 200;
         const larguraTabuleiro = scene.scale.width - larguraPainelLateral;
         const alturaTabuleiro = scene.scale.height;
 
@@ -32,14 +32,14 @@ export class Tabuleiro {
         this.tabuleiroPontos[6][0] = 'terra';
         this.tabuleiroPontos[6][6] = 'nave';
         this.tabuleiroPontos[1][6] = 'planeta';
-        this.tabuleiroPontos[3][1] = 'planeta';
+        this.tabuleiroPontos[6][1] = 'planeta';
         this.tabuleiroPontos[5][4] = 'planeta';
         this.tabuleiroPontos[1][2] = 'planeta';
         this.tabuleiroPontos[5][5] = 'buraco';
         this.tabuleiroPontos[2][9] = 'buraco';
         this.tabuleiroPontos[4][7] = 'planeta';
         this.tabuleiroPontos[6][11] = 'buraco';
-        this.tabuleiroPontos[3][8] = 'planeta';
+        this.tabuleiroPontos[6][8] = 'planeta';
     }
 
     iniciaTabuleiro(){
