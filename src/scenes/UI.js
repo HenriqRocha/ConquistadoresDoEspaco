@@ -11,8 +11,8 @@ export class UI extends Phaser.Scene {
 
         //painel lateral
         const larguraPainel = 200;
-        const padding = 15;
-        let atualY = 40;//para empilhar os elementos
+        const padding = 25;
+        let atualY = 25;//para empilhar os elementos
 
         //separação
         this.add.graphics()
@@ -21,13 +21,16 @@ export class UI extends Phaser.Scene {
 
         //botões e textos para o usuário
         this.textoJogadorAtual = this.add.text(padding, atualY, 'Aguardando...', {
-            fontSize: '20px', fill: '#ffffff'
+            fontSize: '20px',
+            fill: '#ffffff',
+            fontStyle: 'bold'
         });
-        atualY += 60;
+        atualY += 120;
 
         this.textoMovimento = this.add.text(padding, atualY, 'Movimentos: 0',
         {fontSize: '18px',
-        fill: '#ffffff'});
+        fill: '#ffffff',
+        fontStyle: 'bold'});
         atualY += 80;
 
         //criando botão na tela
@@ -41,15 +44,18 @@ export class UI extends Phaser.Scene {
 
         //título pontuação
         this.add.text(padding, atualY, 'Pontuações', {fontSize: '20px', fill: '#ffffff', fontStyle: 'bold'});
-        atualY += 40;
+        atualY += 70;
 
         this.textosPontuacao = [];
         for (let i = 0; i < gameScene.numeroDeJogadores; i++){
-            const texto = this.add.text(padding, atualY, `Jogador ${i + 1}: 0`,{
-                fontSize: '18px', fill: '#ffffff'
+            this.add.image(padding, atualY, `nave00${i + 1}`).setScale(0.25);
+            const texto = this.add.text(padding + 20, atualY, ': 0',{
+                fontSize: '18px',
+                fill: '#ffffff',
+                fontStyle: 'bold'
             });
             this.textosPontuacao.push(texto);
-            atualY += 35;
+            atualY += 80;
         }
 
 
@@ -72,12 +78,14 @@ export class UI extends Phaser.Scene {
 
         //comunicação cenas
         gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
-            this.textoJogadorAtual.setText(`Jogador atual:\n      ${jogadorIndex + 1}`);
+
+            this.textoJogadorAtual.setText(`Jogador atual`);
+            this.imagemJogadorAtual = this.add.image(100, 85, `nave00${jogadorIndex + 1}`).setScale(0.25);
             this.textoMovimento.setText('Movimentos: ' + movimentos);
 
             for (let i = 0; i < pontuacoes.length; i++) {
                 if (this.textosPontuacao[i]){
-                    this.textosPontuacao[i].setText(`Jogador ${i + 1}: ${pontuacoes[i]}`);
+                    this.textosPontuacao[i].setText(`: ${pontuacoes[i]}`);
                 }
             }
         });

@@ -15,10 +15,13 @@ export class Tabuleiro {
         //definindo raio
         const raioMaximo = Math.min(larguraTabuleiro / 2, alturaTabuleiro / 2) * 0.95;
 
+        this.raioInterno = 70;
+        const raioUtilizavel = raioMaximo - this.raioInterno;
+
         //caracteristicas tabuleiro
         this.numeroDeLinhas = 12;
         this.numeroDeColunas = 12;
-        this.distanciaEntreAneis = raioMaximo / this.numeroDeLinhas;
+        this.distanciaEntreAneis = raioUtilizavel / (this.numeroDeLinhas - 1);
 
         //arrays de ponto
         this.tabuleiroPontos = Array.from({ length: this.numeroDeLinhas }, () => Array(this.numeroDeColunas).fill(0));
@@ -49,8 +52,7 @@ export class Tabuleiro {
 
     //converter linha e coluna em posição na tela x y
     getXY(linha, coluna){
-        const raio = (linha + 1) * this.distanciaEntreAneis;
-        //achando o angulo por coluna
+        const raio = this.raioInterno + (linha * this.distanciaEntreAneis);
         const angulo = Phaser.Math.DegToRad(coluna * (360 / this.numeroDeColunas));
 
         const x = this.centroX + raio * Math.cos(angulo);
@@ -78,19 +80,30 @@ export class Tabuleiro {
     desenhaTabuleiro(){
         //desenha os circulos
         for(let i = 0; i < this.numeroDeLinhas; i++){
-            if (i == 3 || i == 7){//circulos de zonas
-                this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
+            const raioDesenho = this.raioInterno + (i * this.distanciaEntreAneis);
+            
+            const circulo = this.scene.add.circle(this.centroX, this.centroY, raioDesenho);
+            
+            if (i === 3 || i === 7) { //circulos de zonas
+                circulo.setStrokeStyle(3, 0xff0000, 0.8).setDepth(1);
+            } else {
+                circulo.setStrokeStyle(2, 0xffffff, 0.4).setDepth(0);
             }
-            //circulos brancos
-            this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);
         }
 
-        const raioMaximo = this.numeroDeLinhas * this.distanciaEntreAneis;
+        const raioMax = this.raioInterno + ((this.numeroDeLinhas - 1) * this.distanciaEntreAneis);
         for (let i = 0; i < this.numeroDeColunas; i++){
             const angulo = Phaser.Math.DegToRad(i * (360 / this.numeroDeColunas));
-            const x = this.centroX + raioMaximo * Math.cos(angulo);
-            const y = this.centroY + raioMaximo * Math.sin(angulo);
-            this.scene.add.line(0, 0, this.centroX, this.centroY, x, y, 0xffffff, 0.5).setOrigin(0).setDepth(0);
+
+            const xInicio = this.centroX + this.raioInterno * Math.cos(angulo);
+            const yInicio = this.centroY + this.raioInterno * Math.sin(angulo);
+            
+            const xFim = this.centroX + raioMax * Math.cos(angulo);
+            const yFim = this.centroY + raioMax * Math.sin(angulo);
+            
+            this.scene.add.line(0, 0, xInicio, yInicio, xFim, yFim, 0xffffff, 0.3)
+                .setOrigin(0)
+                .setDepth(0);
         }
     }
 
