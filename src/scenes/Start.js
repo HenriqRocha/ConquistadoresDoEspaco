@@ -8,6 +8,10 @@ export class Start extends Phaser.Scene {
     }
 
     preload() {
+
+        this.load.image('terra', 'assets/legenda/terra.png'); 
+        this.load.image('naveET', 'assets/legenda/naveET.png'); 
+        
         for(let i = 0; i < 26; i++)
         {
             if(i < 9)
@@ -35,6 +39,8 @@ export class Start extends Phaser.Scene {
         nomesCartas.forEach(nome =>{
             this.load.image(nome, `${nome}.png`);
         });
+
+        
     }
 
     create() {
@@ -185,8 +191,7 @@ export class Start extends Phaser.Scene {
             console.log('não é possível mover-se lateralmente nas divisões de zonas');
             return;
         }
-
-
+        
         //custo de acordo com zonas
         let custo = 1;
         if (direcao === 'horario' || direcao === 'anti-horario'){
@@ -219,7 +224,7 @@ export class Start extends Phaser.Scene {
         const jogadorAtual = this.players[this.jogadorAtualIndex];
         let {linha} = jogadorAtual.position;
 
-        const cartaSorteada = Phaser.Utils.Array.GetRandom(this.baralhoDeEventos);
+        const cartaSorteada = this.baralhoDeEventos[4]//Phaser.Utils.Array.GetRandom(this.baralhoDeEventos);
 
         console.log(`%c--- EVENTO DE ZONA ---`, 'color: yellow; font-weight: bold;');
         console.log(`Jogador ${this.jogadorAtualIndex + 1} sorteou: ${cartaSorteada.titulo}`);
