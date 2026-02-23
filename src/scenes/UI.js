@@ -1,9 +1,29 @@
+//import Phaser from "phaser";
+
+//import Phaser from "phaser";
+
 export class UI extends Phaser.Scene {
     constructor(){
         super({ key: 'UI', active: false});//cena começa inativa
     }
 
-    preload(){}
+    preload(){
+        this.load.image('verde', 'assets/legenda/verde.png');
+        this.load.image('amarelo', 'assets/legenda/amarelo.png');
+        this.load.image('vermelho', 'assets/legenda/vermelho.png');
+        this.load.image('terra', 'assets/legenda/terra.png');
+        this.load.image('naveET', 'assets/legenda/naveET.png');
+        this.load.image('pontos', 'assets/legenda/pontos.png');
+        this.load.image('maisUm', 'assets/legenda/maisUm.png');
+        this.load.image('maisDois', 'assets/legenda/maisDois.png');
+        this.load.image('maisTres', 'assets/legenda/maisTres.png');
+        this.load.image('maisQuatro', 'assets/legenda/maisQuatro.png');
+        this.load.image('cartaVerso1', 'assets/cartas/cartaVerso.png');
+        this.load.spritesheet('dado', 'assets/dado/dadoSemFundo.png', { 
+            frameWidth: 200, 
+            frameHeight: 200 
+        });
+    }
 
     create() {
         //pega a cena do start para 'ouvir' os eventos
@@ -34,10 +54,38 @@ export class UI extends Phaser.Scene {
         this.botaoDado = this.add.text(larguraPainel / 2, atualY, 'Rolar Dado',{
             fontSize: '24px',
             fill:'#ffffff',
-            backgroundColor: '#222222',
+            backgroundColor: 'transparent',
             padding: {x: 10, y: 5}
         }).setOrigin(0.5).setInteractive();
         atualY += 100;
+
+        const paddingX = 20;
+        const paddingY = 10;
+
+        const bounds = this.botaoDado.getBounds();
+
+        const fundo = this.add.graphics();
+
+        fundo.fillStyle(0x1e2a78, 1);
+        fundo.fillRoundedRect(
+            bounds.x - paddingX,
+            bounds.y - paddingY,
+            bounds.width + paddingX * 2,
+            bounds.height + paddingY * 2,
+            12
+        );
+
+        fundo.lineStyle(2, 0x00ffff, 1);
+        fundo.strokeRoundedRect(
+            bounds.x - paddingX, 
+            bounds.y - paddingY, 
+            bounds.width + paddingX * 2,
+            bounds.height + paddingY * 2,
+            12
+        )
+
+        this.botaoDado.setDepth(1);
+        fundo.setDepth(0);
 
         //título pontuação
         this.add.text(padding, atualY, 'Pontuações', {fontSize: '26px', fill: '#ffffff'});
@@ -52,11 +100,36 @@ export class UI extends Phaser.Scene {
             atualY += 35;
         }
 
+    
+        this.add.image(60, 525, 'cartaVerso1').setScale(0.6).angle += 80;
+        this.add.image(70, 527, 'cartaVerso1').setScale(0.6).angle += 85;
+        this.add.image(80, 529, 'cartaVerso1').setScale(0.6).angle += 90;
+        this.add.image(90, 531, 'cartaVerso1').setScale(0.6).angle += 95; 
+        this.add.image(100, 533, 'cartaVerso1').setScale(0.6).angle += 100;
+        this.add.image(110, 535, 'cartaVerso1').setScale(0.6).angle += 105;
+        this.add.image(120, 537, 'cartaVerso1').setScale(0.6).angle += 110;
+        this.add.image(130, 539, 'cartaVerso1').setScale(0.6).angle += 115;
+        this.add.image(140, 541, 'cartaVerso1').setScale(0.6).angle += 120;
+        this.add.image(150, 543, 'cartaVerso1').setScale(0.6).angle += 125;
+        this.add.image(160, 545, 'cartaVerso1').setScale(0.6).angle += 130;
+        this.add.image(170, 547, 'cartaVerso1').setScale(0.6).angle += 135;
+        this.add.image(180, 549, 'cartaVerso1').setScale(0.6).angle += 320;
+    
 
         //lê o clique do mouse e avisa o start para a fc rolar dado
         this.botaoDado.on('pointerdown', () => {
             this.events.emit('rolarDado');
         });
+
+        this.anims.create({
+            key: 'girar_dado',
+            // O Phaser vai do frame 0 ao 5 (os 6 dados da imagem)
+            frames: this.anims.generateFrameNumbers('dado', { start: 0, end: 5 }),
+            frameRate: 15, // Velocidade da animação
+            repeat: -1     // Repete até mandarmos parar
+        });
+
+        //const dadoSprite = this.add.sprite(400, 300, 'dado', 0).setScale(2);
 
         //lê o clique no espaço e avisa o start para a fc rolar dado
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE).on('down', ()=>{
@@ -69,6 +142,21 @@ export class UI extends Phaser.Scene {
         this.cameras.main.width, 
         this.cameras.main.height, 
         0x000000, 0.7).setVisible(false).setDepth(90);   
+
+        
+       // Legenda sprites
+        this.add.image(145, 650, 'pontos');
+        this.add.image(60, 730, 'verde');
+        this.add.image(120, 730, 'maisUm');
+        this.add.image(60, 810, 'amarelo');
+        this.add.image(120, 810, 'maisDois');
+        this.add.image(60, 890, 'vermelho');
+        this.add.image(120, 890, 'maisTres');
+        this.add.image(200, 730, 'terra');
+        this.add.image(260, 730, 'maisQuatro');
+        this.add.image(200, 810, 'naveET');
+        this.add.image(260, 810, 'maisQuatro');
+        
 
         //comunicação cenas
         gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
@@ -86,10 +174,20 @@ export class UI extends Phaser.Scene {
         gameScene.events.on('exibirCarta', (dadosCarta)=>{
             this.ativarEfeitoCarta(dadosCarta.imagem, gameScene);
         })
+
+        /* Teste dado - apagar depois - this.anims.create({
+            key: 'girar_dado',
+            frames: this.anims.generateFrameNumbers('dado', {start: 0, end: 5}),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.spriteDado = this.add.sprite(100, 150, 'dado').setInteractive();*/
     }
 
     //animação carta
     ativarEfeitoCarta(nomeDaCarta, gameScene) {
+        debugger; // Para fins de depuração. Apagar depois. 
         if (this.cartaEmExibicao) return;
 
         const centroX = this.cameras.main.width / 2;
