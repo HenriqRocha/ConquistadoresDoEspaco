@@ -96,7 +96,7 @@ export class Start extends Phaser.Scene {
         //inicializando os dados dos jogadores
         for (let i = 0; i < this.numeroDeJogadores; i++){
             const jogador = new Player(this, i, playersColors[i], 60);
-            jogador.sprite.setPosition(this.tabuleiro.centroX, this.tabuleiro.centroY).setVisible(true);   
+            jogador.posicionarNoCentroInicial();   
             this.players.push(jogador);
                
         }
@@ -148,9 +148,15 @@ export class Start extends Phaser.Scene {
 
     getZona(linha) {
         if (linha <= 2) return 1; // Zona 1 (0, 1, 2)
-        if (linha <= 6) return 2; // Zona 2 (3, 4, 5)
-        return 3;                 // Zona 3 (6, 7, 8)
+        if (linha <= 6) return 2; // Zona 2 (4, 5, 6)
+        return 3;                 // Zona 3 (8, 9)
     }
+
+    isMovimentoParaLinhaVermelha(linhaNova) {
+        if (linhaNova == 3 || linhaNova == 7) return true;
+        return false;
+    }
+
 
     //movimentação teclado
     move(direcao) {
@@ -204,14 +210,11 @@ export class Start extends Phaser.Scene {
         }
         
         if (this.movimentosRestantes >= custo) {
-            const zonaAntiga = this.getZona(linha);
 
             jogadorAtual.playerMove(novaLinha, novaColuna);
             this.movimentosRestantes -= custo;
 
-            const zonaNova = this.getZona(novaLinha);
-
-            if(zonaAntiga !== zonaNova){
+            if(this.isMovimentoParaLinhaVermelha(novaLinha)){
                 this.acionarEventoCarta();
             }else{
                 this.verificarCasaEContinuar(novaLinha, novaColuna);

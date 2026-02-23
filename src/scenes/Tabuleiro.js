@@ -4,7 +4,7 @@ export class Tabuleiro {
         this.scene = scene;
 
         //área do jogdador e cálculo para área de jogo
-        const larguraPainelLateral = 300;
+        const larguraPainelLateral = 200;
         const larguraTabuleiro = scene.scale.width - larguraPainelLateral;
         const alturaTabuleiro = scene.scale.height;
 
@@ -15,10 +15,13 @@ export class Tabuleiro {
         //definindo raio
         const raioMaximo = Math.min(larguraTabuleiro / 2, alturaTabuleiro / 2) * 0.95;
 
+        this.raioInterno = 70;
+        const raioUtilizavel = raioMaximo - this.raioInterno;
+
         //caracteristicas tabuleiro
         this.numeroDeLinhas = 12;
         this.numeroDeColunas = 12;
-        this.distanciaEntreAneis = raioMaximo / this.numeroDeLinhas;
+        this.distanciaEntreAneis = raioUtilizavel / (this.numeroDeLinhas - 1);
 
         //arrays de ponto
         this.tabuleiroPontos = Array.from({ length: this.numeroDeLinhas }, () => Array(this.numeroDeColunas).fill(0));
@@ -32,14 +35,14 @@ export class Tabuleiro {
         this.tabuleiroPontos[6][0] = 'terra';
         this.tabuleiroPontos[6][6] = 'nave';
         this.tabuleiroPontos[1][6] = 'planeta';
-        this.tabuleiroPontos[3][1] = 'planeta';
+        this.tabuleiroPontos[6][1] = 'planeta';
         this.tabuleiroPontos[5][4] = 'planeta';
         this.tabuleiroPontos[1][2] = 'planeta';
         this.tabuleiroPontos[5][5] = 'buraco';
         this.tabuleiroPontos[2][9] = 'buraco';
         this.tabuleiroPontos[4][7] = 'planeta';
         this.tabuleiroPontos[6][11] = 'buraco';
-        this.tabuleiroPontos[3][8] = 'planeta';
+        this.tabuleiroPontos[6][8] = 'planeta';
     }
 
     iniciaTabuleiro(){
@@ -49,8 +52,7 @@ export class Tabuleiro {
 
     //converter linha e coluna em posição na tela x y
     getXY(linha, coluna){
-        const raio = (linha + 1) * this.distanciaEntreAneis;
-        //achando o angulo por coluna
+        const raio = this.raioInterno + (linha * this.distanciaEntreAneis);
         const angulo = Phaser.Math.DegToRad(coluna * (360 / this.numeroDeColunas));
 
         const x = this.centroX + raio * Math.cos(angulo);
@@ -82,17 +84,22 @@ export class Tabuleiro {
                 this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
             }
             //circulos brancos
-            /*this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);*/
-
             this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);
         }
 
-        const raioMaximo = this.numeroDeLinhas * this.distanciaEntreAneis;
+        const raioMax = this.raioInterno + ((this.numeroDeLinhas - 1) * this.distanciaEntreAneis);
         for (let i = 0; i < this.numeroDeColunas; i++){
             const angulo = Phaser.Math.DegToRad(i * (360 / this.numeroDeColunas));
-            const x = this.centroX + raioMaximo * Math.cos(angulo);
-            const y = this.centroY + raioMaximo * Math.sin(angulo);
-            this.scene.add.line(0, 0, this.centroX, this.centroY, x, y, 0xffffff, 0.5).setOrigin(0).setDepth(0);
+
+            const xInicio = this.centroX + this.raioInterno * Math.cos(angulo);
+            const yInicio = this.centroY + this.raioInterno * Math.sin(angulo);
+            
+            const xFim = this.centroX + raioMax * Math.cos(angulo);
+            const yFim = this.centroY + raioMax * Math.sin(angulo);
+            
+            this.scene.add.line(0, 0, xInicio, yInicio, xFim, yFim, 0xffffff, 0.3)
+                .setOrigin(0)
+                .setDepth(0);
         }
     }
 
