@@ -82,6 +82,8 @@ export class Tabuleiro {
                 this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
             }
             //circulos brancos
+            /*this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);*/
+
             this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);
         }
 
@@ -92,6 +94,26 @@ export class Tabuleiro {
             const y = this.centroY + raioMaximo * Math.sin(angulo);
             this.scene.add.line(0, 0, this.centroX, this.centroY, x, y, 0xffffff, 0.5).setOrigin(0).setDepth(0);
         }
+    }
+
+    // Dentro da classe Tabuleiro
+    desenharZonasVermelhas() {
+        const centerX = 400; // Ajuste para o centro do seu canvas
+        const centerY = 300; // Ajuste para o centro do seu canvas
+        const g = this.scene.add.graphics();
+
+        // Raios das duas zonas vermelhas do modelo do professor
+        const raios = [180, 280]; 
+
+        raios.forEach(raio => {
+            // Camada 1: Brilho externo (Grosso e bem transparente)
+            g.lineStyle(12, 0xff0000, 0.2);
+            g.strokeCircle(centerX, centerY, raio);
+
+            // Camada 2: Centro da linha (Mais fina e nítida)
+            g.lineStyle(3, 0xff0000, 0.5);
+            g.strokeCircle(centerX, centerY, raio);
+        });
     }
 
     mostraItens(){
@@ -106,11 +128,42 @@ export class Tabuleiro {
                 let marcador = null;
 
                 if (tipo === 'terra') {
-                    marcador = this.scene.add.circle(pos.x, pos.y, 20, 0x0000ff);
+                    marcador = this.scene.add.image(pos.x, pos.y, 'terra'); 
+                    if (marcador) {
+                        marcador.setDepth(1);
+                        this.marcadoresVisuais[linha][coluna] = marcador;
+
+                        // Adiciona o giro se for planeta ou buraco negro
+                        if (tipo === 'planeta' || tipo === 'buraco' || tipo == 'terra') {
+                            this.scene.tweens.add({
+                                targets: marcador,
+                                angle: 360,          
+                                duration: 10000,      
+                                repeat: -1,         
+                                ease: 'Linear'       
+                            });
+                        }
+                    }         
                 }
                 else if(tipo === 'nave'){
                     //marcador = this.scene.add.image(pos.x, pos.y, 'nave001');
-                    marcador = this.scene.add.star(pos.x, pos.y, 5, 10, 20, 0xffff00);
+                    //marcador = this.scene.add.star(pos.x, pos.y, 5, 10, 20, 0xffff00);
+                    marcador = this.scene.add.image(pos.x, pos.y, 'naveET');
+                    if (marcador) {
+                        marcador.setDepth(1);
+                        this.marcadoresVisuais[linha][coluna] = marcador;
+
+                        // Adiciona o giro se for planeta ou buraco negro
+                        if (tipo === 'planeta' || tipo === 'buraco' || 'naveET') {
+                            this.scene.tweens.add({
+                                targets: marcador,
+                                angle: 360,          
+                                duration: 10000,      
+                                repeat: -1,         
+                                ease: 'Linear'       
+                            });
+                        }
+                    }
                 }
                 else if(tipo === 'planeta'){
                     //marcador = this.scene.add.circle(pos.x, pos.y, 15, 0x00ff00);
@@ -119,9 +172,44 @@ export class Tabuleiro {
                         marcador = this.scene.add.image(pos.x, pos.y, `sun00${planetas}`);
                     else
                         marcador = this.scene.add.image(pos.x, pos.y, `sun0${planetas}`);
+
+                    marcador.setScale(0.8); // Ajuste o valor conforme necessário
+                    
+                    if (marcador) {
+                        marcador.setDepth(1);
+                        this.marcadoresVisuais[linha][coluna] = marcador;
+
+                        // Adiciona o giro se for planeta ou buraco negro
+                        if (tipo === 'planeta' || tipo === 'buraco') {
+                            this.scene.tweens.add({
+                                targets: marcador,
+                                angle: 360,          
+                                duration: 10000,      
+                                repeat: -1,         
+                                ease: 'Linear'       
+                            });
+                        }
+                    }
                 }
                 else if (tipo === 'buraco'){
                     marcador = this.scene.add.image(pos.x, pos.y, `buracoNegro`);
+                    marcador.setScale(0.8); 
+                    
+                    if (marcador) {
+                        marcador.setDepth(1);
+                        this.marcadoresVisuais[linha][coluna] = marcador;
+
+                        
+                        if (tipo === 'planeta' || tipo === 'buraco') {
+                            this.scene.tweens.add({
+                                targets: marcador,
+                                angle: 360,          
+                                duration: 10000,     
+                                repeat: -1,          // Repete infinitamente
+                                ease: 'Linear'      
+                            });
+                        }
+                    }
                 }
 
                 if (marcador){
