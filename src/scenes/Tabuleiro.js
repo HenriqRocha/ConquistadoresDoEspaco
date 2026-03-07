@@ -82,6 +82,12 @@ export class Tabuleiro {
         for(let i = 0; i < this.numeroDeLinhas; i++){
             if (i == 3 || i == 7){//circulos de zonas
                 this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
+
+                console.log((i + 1) * this.distanciaEntreAneis);
+
+                const raioAtual = (i + 1) * this.distanciaEntreAneis;
+
+                console.log(`Raio: ${raioAtual}`);             
             }
             //circulos brancos
             this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);
@@ -101,6 +107,10 @@ export class Tabuleiro {
                 .setOrigin(0)
                 .setDepth(0);
         }
+
+        console.log(this.centroX);
+        console.log(this.centroY);
+
     }
 
     // Dentro da classe Tabuleiro
@@ -186,7 +196,6 @@ export class Tabuleiro {
                         marcador.setDepth(1);
                         this.marcadoresVisuais[linha][coluna] = marcador;
 
-                        // Adiciona o giro se for planeta ou buraco negro
                         if (tipo === 'planeta' || tipo === 'buraco') {
                             this.scene.tweens.add({
                                 targets: marcador,
@@ -212,7 +221,7 @@ export class Tabuleiro {
                                 targets: marcador,
                                 angle: 360,          
                                 duration: 10000,     
-                                repeat: -1,          // Repete infinitamente
+                                repeat: -1,
                                 ease: 'Linear'      
                             });
                         }
