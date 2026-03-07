@@ -2,6 +2,8 @@
 
 //import Phaser from "phaser";
 
+//import Phaser from "phaser";
+
 export class UI extends Phaser.Scene {
     constructor(){
         super({ key: 'UI', active: false});//cena começa inativa
@@ -107,6 +109,7 @@ export class UI extends Phaser.Scene {
         }
 
     
+        /* Comentado momentaneamente 
         this.add.image(60, 525, 'cartaVerso1').setScale(0.6).angle += 80;
         this.add.image(70, 527, 'cartaVerso1').setScale(0.6).angle += 85;
         this.add.image(80, 529, 'cartaVerso1').setScale(0.6).angle += 90;
@@ -119,7 +122,7 @@ export class UI extends Phaser.Scene {
         this.add.image(150, 543, 'cartaVerso1').setScale(0.6).angle += 125;
         this.add.image(160, 545, 'cartaVerso1').setScale(0.6).angle += 130;
         this.add.image(170, 547, 'cartaVerso1').setScale(0.6).angle += 135;
-        this.add.image(180, 549, 'cartaVerso1').setScale(0.6).angle += 320;
+        this.add.image(180, 549, 'cartaVerso1').setScale(0.6).angle += 320;*/
     
 
         //lê o clique do mouse e avisa o start para a fc rolar dado
@@ -183,15 +186,66 @@ export class UI extends Phaser.Scene {
             this.ativarEfeitoCarta(dadosCarta.imagem, gameScene);
         })
 
-        /* Teste dado - apagar depois - this.anims.create({
-            key: 'girar_dado',
-            frames: this.anims.generateFrameNumbers('dado', {start: 0, end: 5}),
-            frameRate: 10,
+        const centX = 700;
+        const centY = 500;
+        const radius = 150;
+
+        const canvasTexture = this.textures.createCanvas('glow', radius * 2, radius * 2);
+        const ctx = canvasTexture.context;
+
+        const gradient = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+        
+        gradient.addColorStop(0, 'rgba(255, 0, 0, 0.8)');
+        gradient.addColorStop(0.5, 'rgba(150, 0, 0, 0.4)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, radius * 2, radius * 2);
+
+        canvasTexture.refresh();
+
+        const centroGrow = this.add.image(centX, centY, 'glow');
+
+        centroGrow.setBlendMode(Phaser.BlendModes.ADD);
+
+        this.tweens.add({
+            targets: centroGrow,
+            alpha: 0.5,
+            scale: 1.1,
+            duration: 2000,
+            yoyo: true,
             repeat: -1
         });
 
-        this.spriteDado = this.add.sprite(100, 150, 'dado').setInteractive();*/
+    // Criando o efeito das partículas
+    this.add.particles(0, 0, 'glow', {
+        lifespan: 2000,
+        speed: { min: 10, max: 20 },
+        scale: { start: 0.2, end: 0 },
+        alpha: { start: 0.6, end: 0 },
+        blendMode: 'ADD',
+        emitZone: {
+            type: 'edge',
+            source: new Phaser.Geom.Circle(700, 500, 147.27), 
+            quantity: 100
+        }
+    });
+
+    this.add.particles(0, 0, 'glow', {
+        lifespan: 2000,
+        speed: { min: 10, max: 20 },
+        scale: { start: 0.2, end: 0 },
+        alpha: { start: 1, end: 0 },
+        blendMode: 'ADD',
+        emitZone: {
+            type: 'edge',
+            source: new Phaser.Geom.Circle(700, 500, 294.54), 
+            quantity: 100
+        }
+    });
     }
+
+    
 
     //animação carta
     ativarEfeitoCarta(nomeDaCarta, gameScene) {
