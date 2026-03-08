@@ -10,9 +10,9 @@ export class UI extends Phaser.Scene {
     }
 
     preload(){
-        this.load.image('verde', 'assets/legenda/verde.png');
+        /*this.load.image('verde', 'assets/legenda/verde.png');
         this.load.image('amarelo', 'assets/legenda/amarelo.png');
-        this.load.image('vermelho', 'assets/legenda/vermelho.png');
+        this.load.image('vermelho', 'assets/legenda/vermelho.png');*/
         this.load.image('terra', 'assets/legenda/terra.png');
         this.load.image('naveET', 'assets/legenda/naveET.png');
         this.load.image('pontos', 'assets/legenda/pontos.png');
@@ -249,7 +249,6 @@ export class UI extends Phaser.Scene {
 
     //animação carta
     ativarEfeitoCarta(nomeDaCarta, gameScene) {
-        debugger; // Para fins de depuração. Apagar depois. 
         if (this.cartaEmExibicao) return;
 
         const centroX = this.cameras.main.width / 2;
@@ -269,7 +268,7 @@ export class UI extends Phaser.Scene {
             fontSize: '24px',
             fill: '#ffffff',
             backgroundColor: '#00d1b2',
-            padding: { x: 20, y: 10 },
+            padding: { x: 30, y: 20 },
             fontStyle: 'bold'
         }).setOrigin(0.5).setDepth(101).setAlpha(0);
 

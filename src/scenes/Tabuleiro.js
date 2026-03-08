@@ -32,17 +32,28 @@ export class Tabuleiro {
     }
 
     preencher(){
-        this.tabuleiroPontos[6][0] = 'terra';
-        this.tabuleiroPontos[6][6] = 'nave';
+        this.tabuleiroPontos[4][0] = 'terra';
+        this.tabuleiroPontos[9][6] = 'nave';
         this.tabuleiroPontos[1][6] = 'planeta';
-        this.tabuleiroPontos[6][1] = 'planeta';
+        this.tabuleiroPontos[7][5] = 'planeta';
         this.tabuleiroPontos[5][4] = 'planeta';
         this.tabuleiroPontos[1][2] = 'planeta';
         this.tabuleiroPontos[5][5] = 'buraco';
-        this.tabuleiroPontos[2][9] = 'buraco';
-        this.tabuleiroPontos[4][7] = 'planeta';
-        this.tabuleiroPontos[6][11] = 'buraco';
-        this.tabuleiroPontos[6][8] = 'planeta';
+        this.tabuleiroPontos[3][9] = 'buraco';
+        this.tabuleiroPontos[4][2] = 'buraco';
+        this.tabuleiroPontos[8][4] = 'buraco';
+        this.tabuleiroPontos[1][10] = 'planeta';
+        this.tabuleiroPontos[7][11] = 'buraco';
+        this.tabuleiroPontos[5][8] = 'planeta';
+        this.tabuleiroPontos[5][1] = 'planeta';
+        this.tabuleiroPontos[4][6] = 'planeta';
+        this.tabuleiroPontos[9][0] = 'planeta';
+        this.tabuleiroPontos[4][12] = 'planeta';
+        this.tabuleiroPontos[8][10] = 'planeta';
+        this.tabuleiroPontos[4][12] = 'planeta';
+        this.tabuleiroPontos[9][3] = 'planeta';
+        this.tabuleiroPontos[9][9] = 'planeta';
+        this.tabuleiroPontos[8][7] = 'planeta';
     }
 
     iniciaTabuleiro(){
@@ -80,7 +91,7 @@ export class Tabuleiro {
     desenhaTabuleiro(){
         //desenha os circulos
         for(let i = 0; i < this.numeroDeLinhas; i++){
-            if (i == 3 || i == 7){//circulos de zonas
+            if (i == 3 || i == 7 || i == 11){//circulos de zonas
                 this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(3, 0xff0000, 0.8). setDepth(1);
 
                 console.log((i + 1) * this.distanciaEntreAneis);
@@ -115,8 +126,8 @@ export class Tabuleiro {
 
     // Dentro da classe Tabuleiro
     desenharZonasVermelhas() {
-        const centerX = 400; // Ajuste para o centro do seu canvas
-        const centerY = 300; // Ajuste para o centro do seu canvas
+        const centerX = 400;
+        const centerY = 300; 
         const g = this.scene.add.graphics();
 
         // Raios das duas zonas vermelhas do modelo do professor
@@ -135,7 +146,6 @@ export class Tabuleiro {
 
     mostraItens(){
 
-        let planetas = 0; // para controlar as imagens dos planetas e não extrapolar a quantidade que temos (26)
         for (let linha = 0; linha < this.numeroDeLinhas; linha++){
             for (let coluna = 0; coluna < this.numeroDeColunas; coluna++){
                 const tipo = this.getItem(linha, coluna);
@@ -163,8 +173,6 @@ export class Tabuleiro {
                     }         
                 }
                 else if(tipo === 'nave'){
-                    //marcador = this.scene.add.image(pos.x, pos.y, 'nave001');
-                    //marcador = this.scene.add.star(pos.x, pos.y, 5, 10, 20, 0xffff00);
                     marcador = this.scene.add.image(pos.x, pos.y, 'naveET');
                     if (marcador) {
                         marcador.setDepth(1);
@@ -183,12 +191,17 @@ export class Tabuleiro {
                     }
                 }
                 else if(tipo === 'planeta'){
-                    //marcador = this.scene.add.circle(pos.x, pos.y, 15, 0x00ff00);
-                    planetas++;
-                    if(planetas < 10)
-                        marcador = this.scene.add.image(pos.x, pos.y, `sun00${planetas}`);
-                    else
-                        marcador = this.scene.add.image(pos.x, pos.y, `sun0${planetas}`);
+                    console.log(linha)
+
+                    if (linha < 3){
+                        marcador = this.scene.add.image(pos.x, pos.y, 'planeta-verde');
+                    } else if(linha < 7){
+                        marcador = this.scene.add.image(pos.x, pos.y, 'planeta-amarelo')
+                    } else if(linha > 6){
+                        marcador = this.scene.add.image(pos.x, pos.y, 'planeta-vermelho')
+                    }
+                    
+                    
 
                     marcador.setScale(0.8); // Ajuste o valor conforme necessário
                     

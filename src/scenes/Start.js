@@ -12,13 +12,11 @@ export class Start extends Phaser.Scene {
         this.load.image('terra', 'assets/legenda/terra.png'); 
         this.load.image('naveET', 'assets/legenda/naveET.png'); 
         
-        for(let i = 0; i < 26; i++)
-        {
-            if(i < 9)
-                this.load.image(`sun00${i + 1}`, `assets/planetas/sun00${i + 1}.png`);
-            else
-                this.load.image(`sun0${i + 1}`, `assets/planetas/sun0${i + 1}.png`);
-        }
+        this.load.image('planeta-verde', 'assets/planetas/verde.png')
+        this.load.image('planeta-amarelo', 'assets/planetas/amarelo.png')
+        this.load.image('planeta-vermelho', 'assets/planetas/vermelho.png')
+
+        this.load.path = '';
 
         for(let i = 1; i <= 5; i++)
         {
@@ -153,7 +151,7 @@ export class Start extends Phaser.Scene {
     }
 
     isMovimentoParaLinhaVermelha(linhaNova) {
-        if (linhaNova == 3 || linhaNova == 7) return true;
+        if (linhaNova == 2 || linhaNova == 6 || linhaNova == 10) return true;
         return false;
     }
 
@@ -227,7 +225,7 @@ export class Start extends Phaser.Scene {
         const jogadorAtual = this.players[this.jogadorAtualIndex];
         let {linha} = jogadorAtual.position;
 
-        const cartaSorteada = this.baralhoDeEventos[4]//Phaser.Utils.Array.GetRandom(this.baralhoDeEventos);
+        const cartaSorteada = Phaser.Utils.Array.GetRandom(this.baralhoDeEventos);
 
         console.log(`%c--- EVENTO DE ZONA ---`, 'color: yellow; font-weight: bold;');
         console.log(`Jogador ${this.jogadorAtualIndex + 1} sorteou: ${cartaSorteada.titulo}`);
