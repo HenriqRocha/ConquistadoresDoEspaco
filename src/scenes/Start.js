@@ -9,17 +9,16 @@ export class Start extends Phaser.Scene {
 
     preload() {
 
-        this.load.image('terra', 'assets/legenda/terra.png'); 
-        this.load.image('naveET', 'assets/legenda/naveET.png'); 
-        
+        this.load.image('terra', 'assets/legenda/terra.png');
+        this.load.image('naveET', 'assets/legenda/naveET.png');
+
         this.load.image('planeta-verde', 'assets/planetas/verde.png')
         this.load.image('planeta-amarelo', 'assets/planetas/amarelo.png')
         this.load.image('planeta-vermelho', 'assets/planetas/vermelho.png')
 
         this.load.path = '';
 
-        for(let i = 1; i <= 5; i++)
-        {
+        for (let i = 1; i <= 5; i++) {
             this.load.image(`nave00${i}`, `assets/naves/nave00${i}.png`);
         }
 
@@ -34,11 +33,11 @@ export class Start extends Phaser.Scene {
             'leveTurbulencia', 'reflexaoNaRetaR1', 'reflexaoNaRetaR4'
         ]
 
-        nomesCartas.forEach(nome =>{
+        nomesCartas.forEach(nome => {
             this.load.image(nome, `${nome}.png`);
         });
 
-        
+
     }
 
     create() {
@@ -49,7 +48,7 @@ export class Start extends Phaser.Scene {
         this.objetosDePontuacaoRestantes = 0;
         this.tabuleiro.tabuleiroPontos.forEach(linha => {
             linha.forEach(item => {
-                if (item === 'planeta' || item === 'terra' || item === 'nave'){
+                if (item === 'planeta' || item === 'terra' || item === 'nave') {
                     this.objetosDePontuacaoRestantes++;
                 }
             });
@@ -76,11 +75,11 @@ export class Start extends Phaser.Scene {
             { titulo: 'Giro Anti-Horário 150°', imagem: 'giroAnti-horario150', efeito: 'GIRO', valor: -5 },
             { titulo: 'Giro Horário 180°', imagem: 'giroHorario180', efeito: 'GIRO', valor: 6 },
             { titulo: 'Giro Anti-Horário 180°', imagem: 'giroAnti-horario180', efeito: 'GIRO', valor: -6 },
-            
+
             // Reflexões (R1 = Eixo Vertical, R4 = Eixo Horizontal, pode ser ajustado)
             { titulo: 'Reflexão na Reta R1', imagem: 'reflexaoNaRetaR1', efeito: 'REFLEXAO', valor: 'R1' },
             { titulo: 'Reflexão na Reta R4', imagem: 'reflexaoNaRetaR4', efeito: 'REFLEXAO', valor: 'R4' },
-            
+
             // Efeitos de Jogo
             { titulo: 'Campo Atrator', imagem: 'campoAtrator', efeito: 'PERDE_MOVIMENTO_RESTANTE' },
             { titulo: 'Leve Turbulência', imagem: 'leveTurbulencia', efeito: 'NENHUM_EFEITO' }
@@ -92,14 +91,14 @@ export class Start extends Phaser.Scene {
 
 
         //inicializando os dados dos jogadores
-        for (let i = 0; i < this.numeroDeJogadores; i++){
+        for (let i = 0; i < this.numeroDeJogadores; i++) {
             const jogador = new Player(this, i, playersColors[i], 60);
-            jogador.posicionarNoCentroInicial();   
+            jogador.posicionarNoCentroInicial();
             this.players.push(jogador);
-               
+
         }
 
-        
+
         //inputs de movimento
         this.cursors = this.input.keyboard.createCursorKeys();//setinhas teclado
         this.input.on('pointerdown', this.moveMouse, this);//clique do mouse
@@ -111,36 +110,50 @@ export class Start extends Phaser.Scene {
         uiScene.events.on('uiPronta', () => {
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
         })
-        this.events.on('cartaFechada', ()=>{
+        this.events.on('cartaFechada', () => {
             console.log('animação da carta terminou')
 
             const jogadorAtual = this.players[this.jogadorAtualIndex];
 
             this.estadoTurno = 'MOVENDO';
-            this.verificarCasaEContinuar(jogadorAtual.position.linha, jogadorAtual.position.coluna);
+
+            if (this.movimentoPendenteCarta) {
+                const { linha, coluna } = this.movimentoPendenteCarta;               
+
+                //esperando para a animação da carta acabar
+                this.time.delayedCall(400, () => {
+                    //realiza o movimento animado
+                    jogadorAtual.playerMove(linha, coluna);
+                    this.verificarCasaEContinuar(linha, coluna);
+                });
+
+                this.movimentoPendenteCarta = null;
+            } else {
+                this.verificarCasaEContinuar(jogadorAtual.position.linha, jogadorAtual.position.coluna);
+            }
         });
-        
+
     }
-    
-    update(){
-        if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0 && (this.estadoTurno === 'MOVENDO' || this.estadoTurno === 'DESEMPATE')){
-            if(Phaser.Input.Keyboard.JustDown(this.cursors.left)){
+
+    update() {
+        if (this.players[this.jogadorAtualIndex].position && this.movimentosRestantes > 0 && (this.estadoTurno === 'MOVENDO' || this.estadoTurno === 'DESEMPATE')) {
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
                 console.log('anti-horario');
                 this.move('anti-horario');
-            } else if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){
+            } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
                 console.log('horario');
                 this.move('horario');
-            } else if(Phaser.Input.Keyboard.JustDown(this.cursors.up)){
+            } else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 console.log('dentro');
                 this.move('dentro');
-            } else if(Phaser.Input.Keyboard.JustDown(this.cursors.down)){
+            } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
                 console.log('fora');
                 this.move('fora');
             }
         }
     }
 
-    isOcupado(linha, coluna){
+    isOcupado(linha, coluna) {
         return this.players.some(p => p.position && p.position.linha === linha && p.position.coluna === coluna);
     }
 
@@ -165,13 +178,13 @@ export class Start extends Phaser.Scene {
 
         let { linha, coluna } = jogadorAtual.position;
 
-        if(this.estadoTurno === 'DESEMPATE' && direcao === 'dentro' && linha === 0){
+        if (this.estadoTurno === 'DESEMPATE' && direcao === 'dentro' && linha === 0) {
             console.log(`${this.movimentosRestantes}`);
-            if(this.movimentosRestantes >= 1){
+            if (this.movimentosRestantes >= 1) {
                 console.log(`${jogadorAtual.id + 1} voltou ao centro e venceu`);
                 jogadorAtual.retornaAoCentro();
                 this.gameOver(jogadorAtual.id);
-            }else{
+            } else {
                 console.log('movimentos insuficientes para voltar ao centro');
             }
             return;
@@ -181,7 +194,7 @@ export class Start extends Phaser.Scene {
         let novaColuna = coluna;
 
         //posição na lógica
-        switch(direcao) {
+        switch (direcao) {
             case 'dentro': novaLinha--; break;
             case 'fora': novaLinha++; break;
             case 'anti-horario': novaColuna = (coluna - 1 + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas; break;
@@ -191,74 +204,77 @@ export class Start extends Phaser.Scene {
         //checa movimento possivel
         if (novaLinha < 0 || novaLinha >= this.tabuleiro.numeroDeLinhas) return;
         if (this.isOcupado(novaLinha, novaColuna)) return;
-        if ((linhaAtual == 3 || linhaAtual == 7) && (direcao == 'horario' || direcao == 'anti-horario')){
+        if ((linhaAtual == 2 || linhaAtual == 6) && (direcao == 'horario' || direcao == 'anti-horario')) {
             console.log('não é possível mover-se lateralmente nas divisões de zonas');
             return;
         }
-        
+
         //custo de acordo com zonas
         let custo = 1;
-        if (direcao === 'horario' || direcao === 'anti-horario'){
-            if (this.getZona(linhaAtual) == 3){
+        if (direcao === 'horario' || direcao === 'anti-horario') {
+            if (this.getZona(linhaAtual) == 3) {
                 custo = 3;
             }
-            else if (this.getZona(linhaAtual) == 2){
+            else if (this.getZona(linhaAtual) == 2) {
                 custo = 2;
             }
         }
-        
+
         if (this.movimentosRestantes >= custo) {
 
             jogadorAtual.playerMove(novaLinha, novaColuna);
             this.movimentosRestantes -= custo;
 
-            if(this.isMovimentoParaLinhaVermelha(novaLinha)){
+            if (this.isMovimentoParaLinhaVermelha(novaLinha)) {
                 this.acionarEventoCarta();
-            }else{
+            } else {
                 this.verificarCasaEContinuar(novaLinha, novaColuna);
             }
         }
     }
 
-    acionarEventoCarta(){
+    acionarEventoCarta() {
         this.estadoTurno = 'EVENTO_CARTA';
         const jogadorAtual = this.players[this.jogadorAtualIndex];
-        let {linha} = jogadorAtual.position;
+        let { linha } = jogadorAtual.position;
 
         const cartaSorteada = Phaser.Utils.Array.GetRandom(this.baralhoDeEventos);
 
         console.log(`%c--- EVENTO DE ZONA ---`, 'color: yellow; font-weight: bold;');
         console.log(`Jogador ${this.jogadorAtualIndex + 1} sorteou: ${cartaSorteada.titulo}`);
+
+        this.movimentoPendenteCarta = null;
+
         this.events.emit('exibirCarta', cartaSorteada);
 
-        switch(cartaSorteada.efeito){
-            case 'GIRO':{
-                let {coluna} = jogadorAtual.position;
-                let novaColunaGiro = (coluna + cartaSorteada.valor + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas;
+        switch (cartaSorteada.efeito) {
+            case 'GIRO': {
+                let { coluna } = jogadorAtual.position;
+                let novaCol = (coluna + cartaSorteada.valor + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas;
 
                 //procura casa livre
                 let tentativas = 0;
-                while (this.isOcupado(linha, novaColunaGiro) && tentativas < this.tabuleiro.numeroDeColunas){
-                    novaColunaGiro = (novaColunaGiro + Math.sign(cartaSorteada.valor) + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas;
+                while (this.isOcupado(linha, novaCol) && tentativas < this.tabuleiro.numeroDeColunas) {
+                    novaCol = (novaCol + Math.sign(cartaSorteada.valor) + this.tabuleiro.numeroDeColunas) % this.tabuleiro.numeroDeColunas;
                     tentativas++;
                 }
 
-                if (!this.isOcupado(linha, novaColunaGiro)){
-                    jogadorAtual.playerMove(linha, novaColunaGiro);
+                if (!this.isOcupado(linha, novaCol)) {
+                    this.movimentoPendenteCarta = { linha: linha, coluna: novaCol };//guarda o movimento pendente para ser emitido no listener
                 }
                 break;
             }
-            case 'REFLEXAO':{
-                let {coluna} = jogadorAtual.position;
-                let novaColunaReflexao = coluna;
-                if (cartaSorteada.valor === 'R1'){
-                    novaColunaReflexao = (12 - coluna) % 12;
-                } else if(cartaSorteada.valor === 'R4'){
-                    novaColunaReflexao = (6 - coluna + 12) % 12;
+            case 'REFLEXAO': {
+                let { coluna } = jogadorAtual.position;
+                let novaCol = coluna;
+                if (cartaSorteada.valor === 'R1') {
+                    novaCol = (12 - coluna) % 12;
+                } else if (cartaSorteada.valor === 'R4') {
+                    novaCol = (6 - coluna + 12) % 12;
                 }
 
-                if (!this.isOcupado(linha, novaColunaReflexao)){
-                    jogadorAtual.playerMove(linha,novaColunaReflexao);
+                if (!this.isOcupado(linha, novaCol)) {
+                    this.movimentoPendenteCarta = { linha: linha, coluna: novaCol };
                 }
                 break;
             }
@@ -268,45 +284,45 @@ export class Start extends Phaser.Scene {
 
             case 'NENHUM_EFEITO':
                 break;
-        }      
+        }
     }
 
-    verificarCasaEContinuar(linha, coluna){
+    verificarCasaEContinuar(linha, coluna) {
         const jogadorAtual = this.players[this.jogadorAtualIndex];
         const tipo = this.tabuleiro.getItem(linha, coluna);
 
-        if(tipo === 'buraco'){
+        if (tipo === 'buraco') {
             this.eliminaJogador(this.jogadorAtualIndex);
             return;
         }
 
         let pontos = 0;
-        if(tipo === 'terra' || tipo === 'nave'){pontos = 4;}
-        else if(tipo === 'planeta'){
+        if (tipo === 'terra' || tipo === 'nave') { pontos = 4; }
+        else if (tipo === 'planeta') {
             pontos = this.getZona(linha);
         }
 
-        if(pontos > 0){
+        if (pontos > 0) {
             jogadorAtual.somaPontos(pontos);
             this.tabuleiro.removeItem(linha, coluna);
 
             this.objetosDePontuacaoRestantes--;
             console.log(`restam ${this.objetosDePontuacaoRestantes} objetos de pontuação restantes`);
-            if (this.objetosDePontuacaoRestantes <= 0){
+            if (this.objetosDePontuacaoRestantes <= 0) {
                 this.testaFimDeJogo();
                 return;
             }
         }
 
-        if(pontos > 0 || this.movimentosRestantes <= 0){
+        if (pontos > 0 || this.movimentosRestantes <= 0) {
             this.proximoJogador();
-        } else{
+        } else {
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
         }
     }
 
     //movimentação mouse
-    moveMouse(pointer){
+    moveMouse(pointer) {
         const jogadorAtual = this.players[this.jogadorAtualIndex];
 
         //primeira jogada
@@ -343,7 +359,7 @@ export class Start extends Phaser.Scene {
             }
             return;
         }
-        
+
         // CASO 2: O JOGADOR JÁ ESTÁ NO TABULEIRO (JOGADAS NORMAIS)
         if (this.movimentosRestantes <= 0 || (this.estadoTurno !== 'MOVENDO' && this.estadoTurno !== 'DESEMPATE')) {
             return;
@@ -383,36 +399,36 @@ export class Start extends Phaser.Scene {
     }
 
 
-    rolarDado(){
-        if (this.movimentosRestantes === 0 && (this.estadoTurno === 'AGUARDANDO_JOGADA' || this.estadoTurno === 'DESEMPATE')){
-            this.movimentosRestantes = Phaser.Math.Between(1,6);
-            
-            if(this.estadoTurno === 'AGUARDANDO_JOGADA'){
+    rolarDado() {
+        if (this.movimentosRestantes === 0 && (this.estadoTurno === 'AGUARDANDO_JOGADA' || this.estadoTurno === 'DESEMPATE')) {
+            this.movimentosRestantes = Phaser.Math.Between(1, 6);
+
+            if (this.estadoTurno === 'AGUARDANDO_JOGADA') {
                 this.estadoTurno = 'MOVENDO';
             }
 
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
         }
-        
+
     }
 
-    proximoJogador(){
+    proximoJogador() {
         this.movimentosRestantes = 0;
-        if(this.estadoTurno !== 'DESEMPATE'){
-            this.estadoTurno = 'AGUARDANDO_JOGADA';   
+        if (this.estadoTurno !== 'DESEMPATE') {
+            this.estadoTurno = 'AGUARDANDO_JOGADA';
         }
         let proximoIndex = (this.jogadorAtualIndex + 1) % this.numeroDeJogadores;
 
         let tentativas = 0;
-        while(tentativas < this.numeroDeJogadores){
+        while (tentativas < this.numeroDeJogadores) {
             const proximoJogador = this.players[proximoIndex];
             //encontrando jogador valido no desempate
-            if(this.estadoTurno === 'DESEMPATE'){
-                if(proximoJogador.isAtivo && this.jogadoresNoDesempate.includes(proximoJogador.id)){
+            if (this.estadoTurno === 'DESEMPATE') {
+                if (proximoJogador.isAtivo && this.jogadoresNoDesempate.includes(proximoJogador.id)) {
                     break;
                 }
-            }else{ //lógica normal
-                if(proximoJogador.isAtivo){
+            } else { //lógica normal
+                if (proximoJogador.isAtivo) {
                     break;
                 }
             }
@@ -423,12 +439,12 @@ export class Start extends Phaser.Scene {
         this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
     }
 
-    eliminaJogador(index){
+    eliminaJogador(index) {
         this.players[index].elimina();
 
         //checa se sobrou só 1
         const jogadoresRestantes = this.players.filter(p => p.isAtivo).length;
-        if (jogadoresRestantes <= 1){
+        if (jogadoresRestantes <= 1) {
             const vencedorIndex = this.players.findIndex(p => p.isAtivo === true);
             this.gameOver(vencedorIndex);
         } else {
@@ -436,21 +452,21 @@ export class Start extends Phaser.Scene {
         }
     }
 
-    testaFimDeJogo(){
+    testaFimDeJogo() {
         const jogadoresAtivos = this.players.filter(p => p.isAtivo);
         const pontuacaoMaxima = Math.max(...jogadoresAtivos.map(p => p.pontos));
         const jogadoresEmpatados = jogadoresAtivos.filter(p => p.pontos === pontuacaoMaxima);
 
-        if(jogadoresEmpatados.length === 1){
+        if (jogadoresEmpatados.length === 1) {
             //vencedor claro
             this.gameOver(jogadoresEmpatados[0].id);
-        } else{//empate
+        } else {//empate
             console.log(`empate com ${pontuacaoMaxima} pontos`);
             this.estadoTurno = 'DESEMPATE';
             this.jogadoresNoDesempate = jogadoresEmpatados.map(p => p.id)//guarda quem concorre o desempate
             //eliminando jogadores que não estão empatados
-            this.players.forEach(jogador =>{
-                if(jogador.isAtivo && !this.jogadoresNoDesempate.includes(jogador.id)){
+            this.players.forEach(jogador => {
+                if (jogador.isAtivo && !this.jogadoresNoDesempate.includes(jogador.id)) {
                     jogador.elimina();
                 }
             })
@@ -460,7 +476,7 @@ export class Start extends Phaser.Scene {
         }
     }
 
-    gameOver(vencedorIndex){
+    gameOver(vencedorIndex) {
         this.scene.stop('UI');
         const pontuacaoVencedor = vencedorIndex > -1 ? this.players[vencedorIndex].pontos : 0
         this.scene.start('GameOver', {
@@ -469,7 +485,7 @@ export class Start extends Phaser.Scene {
         });
     }
 
-    getPontuacoesArray(){
+    getPontuacoesArray() {
         return this.players.map(p => p.pontos);
     }
 }
