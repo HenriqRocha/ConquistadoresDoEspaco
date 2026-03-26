@@ -13,6 +13,8 @@ export class UI extends Phaser.Scene {
         /*this.load.image('verde', 'assets/legenda/verde.png');
         this.load.image('amarelo', 'assets/legenda/amarelo.png');
         this.load.image('vermelho', 'assets/legenda/vermelho.png');*/
+        this.load.image('cubo', 'assets/outros/cubo.png');
+        this.load.image('legenda', 'assets/legenda/legenda.png');
         this.load.image('terra', 'assets/legenda/terra.png');
         this.load.image('naveET', 'assets/legenda/naveET.png');
         this.load.image('pontos', 'assets/legenda/pontos.png');
@@ -30,6 +32,9 @@ export class UI extends Phaser.Scene {
     create() {
         //pega a cena do start para 'ouvir' os eventos
         const gameScene = this.scene.get('Start');
+
+         this.add.image(700, 500, 'cubo').setScale(0.2);
+        //this.cubo.setDepth(1);
 
         //painel lateral
         const larguraPainel = 200;
@@ -153,7 +158,7 @@ export class UI extends Phaser.Scene {
         0x000000, 0.7).setVisible(false).setDepth(90);   
 
         
-       // Legenda sprites
+       /* Legenda sprites
         this.add.image(145, 650, 'pontos');
         this.add.image(60, 730, 'verde');
         this.add.image(120, 730, 'maisUm');
@@ -164,8 +169,9 @@ export class UI extends Phaser.Scene {
         this.add.image(200, 730, 'terra');
         this.add.image(260, 730, 'maisQuatro');
         this.add.image(200, 810, 'naveET');
-        this.add.image(260, 810, 'maisQuatro');
-        
+        this.add.image(260, 810, 'maisQuatro');*/
+        this.add.image(100, 800, 'legenda').setScale(1.2);
+
 
         //comunicação cenas
         gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
