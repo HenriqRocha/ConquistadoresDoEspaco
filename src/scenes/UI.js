@@ -13,6 +13,12 @@ export class UI extends Phaser.Scene {
         /*this.load.image('verde', 'assets/legenda/verde.png');
         this.load.image('amarelo', 'assets/legenda/amarelo.png');
         this.load.image('vermelho', 'assets/legenda/vermelho.png');*/
+        this.load.image('linhaR6', 'assets/legenda/linhaR6.png');
+        this.load.image('linhaR5', 'assets/legenda/linhaR5.png');
+        this.load.image('linhaR4', 'assets/legenda/linhaR4.png');
+        this.load.image('linhaR3', 'assets/legenda/linhaR3.png');
+        this.load.image('linhaR2', 'assets/legenda/linhaR2.png');
+        this.load.image('linhaR1', 'assets/legenda/linhaR1.png');
         this.load.image('cubo', 'assets/outros/cubo.png');
         this.load.image('legenda', 'assets/legenda/legenda.png');
         this.load.image('terra', 'assets/legenda/terra.png');
@@ -33,7 +39,20 @@ export class UI extends Phaser.Scene {
         //pega a cena do start para 'ouvir' os eventos
         const gameScene = this.scene.get('Start');
 
-         this.add.image(700, 500, 'cubo').setScale(0.2);
+        this.add.image(700, 500, 'cubo').setScale(0.2);
+        this.add.image(1170, 500, 'linhaR1');
+        this.add.image(1120, 260, 'linhaR2');
+        this.add.image(945, 70, 'linhaR3');
+        this.add.image(703, 20, 'linhaR4');
+        this.add.image(440, 70, 'linhaR5');
+        this.add.image(265, 260, 'linhaR6');
+        this.add.image(220, 500, 'linhaR1').setAngle(180);
+        this.add.image(280, 750, 'linhaR2').setAngle(180);
+        this.add.image(460, 925, 'linhaR3').setAngle(180);
+        this.add.image(690, 980, 'linhaR4').setAngle(180);
+        this.add.image(950, 920, 'linhaR5').setAngle(180);
+        this.add.image(1115, 745, 'linhaR6').setAngle(180);
+         
         //this.cubo.setDepth(1);
 
         //painel lateral
@@ -172,7 +191,7 @@ export class UI extends Phaser.Scene {
         this.add.image(260, 810, 'maisQuatro');*/
         this.add.image(100, 800, 'legenda').setScale(1.2);
 
-
+        
         //comunicação cenas
         gameScene.events.on('updateTurno', (jogadorIndex, pontuacoes, movimentos) =>{
 
@@ -226,14 +245,15 @@ export class UI extends Phaser.Scene {
     // Criando o efeito das partículas
     this.add.particles(0, 0, 'glow', {
         lifespan: 2000,
-        speed: { min: 10, max: 20 },
+        speed: { min: 20, max: 30 },
         scale: { start: 0.2, end: 0 },
-        alpha: { start: 0.6, end: 0 },
+        alpha: { start: 1, end: 0 },
         blendMode: 'ADD',
         emitZone: {
             type: 'edge',
             source: new Phaser.Geom.Circle(700, 500, 147.27), 
-            quantity: 100
+            quantity: 200
+            //stepRate: 0.5
         }
     });
 
@@ -246,12 +266,24 @@ export class UI extends Phaser.Scene {
         emitZone: {
             type: 'edge',
             source: new Phaser.Geom.Circle(700, 500, 294.54), 
-            quantity: 100
-        }
+            quantity: 200
+        },
+    });
+
+    this.add.particles(0, 0, 'glow', {
+        lifespan: 2000,
+        speed: { min: 20, max: 30 },
+        scale: { start: 0.2, end: 0 },
+        alpha: { start: 1, end: 0 },
+        blendMode: 'ADD',
+        emitZone: {
+            type: 'edge',
+            source: new Phaser.Geom.Circle(700, 500, 441.81), 
+            quantity: 200
+        },
+        
     });
     }
-
-    
 
     //animação carta
     ativarEfeitoCarta(nomeDaCarta, gameScene) {
