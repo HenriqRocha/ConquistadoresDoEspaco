@@ -15,6 +15,7 @@ export class Start extends Phaser.Scene {
         this.load.image('planeta-verde', 'assets/planetas/verde.png')
         this.load.image('planeta-amarelo', 'assets/planetas/amarelo.png')
         this.load.image('planeta-vermelho', 'assets/planetas/vermelho.png')
+        this.load.image('cubo', 'assets/outros/cubo.png');
 
         this.load.path = '';
 
@@ -23,6 +24,12 @@ export class Start extends Phaser.Scene {
         }
 
         this.load.image('buracoNegro', `assets/buracoNegro/buracoNegro.png`);
+
+        this.load.spritesheet('dado_spritesheet', 'assets/dado/dadoSemFundo.png', { 
+        frameWidth: 296,
+        frameHeight: 304,
+        spacing: 1 
+        });
 
         this.load.path = 'assets/cartas/';
 
@@ -37,12 +44,74 @@ export class Start extends Phaser.Scene {
             this.load.image(nome, `${nome}.png`);
         });
 
+        this.load.path = '';
 
     }
 
     create() {
         this.tabuleiro = new Tabuleiro(this);
         this.tabuleiro.iniciaTabuleiro();
+        const cx = this.tabuleiro.centroX;
+        const cy = this.tabuleiro.centroY;
+
+
+        // Camada 1: Brilho externo de "calor" (mais largo e muito suave)
+    const brilhoExterno = this.add.circle(cx, cy, 110, 0xff3300, 0.1)
+        .setDepth(0.4);
+
+    // Camada 2: O anel avermelhado principal
+    const anelPrincipal = this.add.circle(cx, cy, 85, 0xff0000, 0.2)
+        .setDepth(0.5);
+
+    // Camada 3: Efeito de "textura" pontilhada (simulando os detalhes da foto)
+    // Criamos um gráfico para desenhar um círculo tracejado
+    const detalhesTextura = this.add.graphics();
+    // CORREÇÃO: Definimos a posição do objeto no centro do tabuleiro.
+    // No Phaser, a rotação de um objeto Graphics ocorre em torno do seu (x, y).
+    detalhesTextura.setPosition(cx, cy); 
+    detalhesTextura.lineStyle(4, 0xffcc00, 0.3);
+    
+    // Desenha pequenos traços ao redor do ponto (0,0) relativo do objeto
+    for (let i = 0; i < 360; i += 15) {
+        const angulo = Phaser.Math.DegToRad(i);
+        // As coordenadas agora são relativas ao centro do objeto (0,0)
+        const x1 = Math.cos(angulo) * 75;
+        const y1 = Math.sin(angulo) * 75;
+        const x2 = Math.cos(angulo) * 82;
+        const y2 = Math.sin(angulo) * 82;
+        detalhesTextura.lineBetween(x1, y1, x2, y2);
+    }
+    detalhesTextura.setDepth(0.6);
+
+    // Camada 4: Núcleo interno (brilho amarelado mais forte antes do cubo)
+    const nucleoAura = this.add.circle(cx, cy, 65, 0xffaa00, 0.25)
+        .setDepth(0.7);
+
+    // --- ANIMAÇÃO DE PULSAÇÃO ---
+    // Faz o conjunto "respirar"
+    this.tweens.add({
+        targets: [brilhoExterno, anelPrincipal, nucleoAura],
+        scale: 1.05,
+        alpha: (target) => target.alpha + 0.1,
+        duration: 2000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+    });
+
+    // Faz a textura girar bem devagar para dar vida
+    // Agora que detalhesTextura.x/y é cx/cy, ele girará no centro do tabuleiro
+    this.tweens.add({
+        targets: detalhesTextura,
+        rotation: Math.PI * 2,
+        duration: 60000, // 1 minuto para uma volta completa
+        repeat: -1
+    });
+
+
+        this.cuboCentro = this.add.image(cx, cy, 'cubo')
+            .setScale(0.2)
+            .setDepth(1);
 
         //contando objetos de pontuação
         this.objetosDePontuacaoRestantes = 0;
@@ -118,7 +187,7 @@ export class Start extends Phaser.Scene {
             this.estadoTurno = 'MOVENDO';
 
             if (this.movimentoPendenteCarta) {
-                const { linha, coluna } = this.movimentoPendenteCarta;               
+                const { linha, coluna } = this.movimentoPendenteCarta;
 
                 //esperando para a animação da carta acabar
                 this.time.delayedCall(400, () => {
@@ -401,14 +470,26 @@ export class Start extends Phaser.Scene {
 
     rolarDado() {
         if (this.movimentosRestantes === 0 && (this.estadoTurno === 'AGUARDANDO_JOGADA' || this.estadoTurno === 'DESEMPATE')) {
-            this.movimentosRestantes = Phaser.Math.Between(1, 6);
+        
+        const valorSorteado = Phaser.Math.Between(1, 6);
+        const estadoAnterior = this.estadoTurno;
+        
+        this.estadoTurno = 'DADO_ROLANDO';
 
-            if (this.estadoTurno === 'AGUARDANDO_JOGADA') {
+        this.events.emit('animarDado', valorSorteado);
+
+        this.time.delayedCall(1000, () => {
+            this.movimentosRestantes = valorSorteado;
+
+            if (estadoAnterior === 'AGUARDANDO_JOGADA') {
                 this.estadoTurno = 'MOVENDO';
+            } else {
+                this.estadoTurno = 'DESEMPATE';
             }
 
             this.events.emit('updateTurno', this.jogadorAtualIndex, this.getPontuacoesArray(), this.movimentosRestantes);
-        }
+        });
+    }
 
     }
 
