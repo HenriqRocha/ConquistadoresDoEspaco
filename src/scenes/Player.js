@@ -6,11 +6,23 @@ export class Player {
         this.isAtivo = true;
         this.position = null;
 
+        this.particulas = scene.add.particles(0, 0, 'naveET', {
+            speed: 10,
+            scale: { start: 0.2, end: 0 },
+            alpha: { start: 0.5, end: 0 },
+            blendMode: 'ADD',
+            lifespan: 300,
+            emitting: false // Começa desligado
+        });
+
         this.sprite = scene.add.image(0, 0, `nave00${id + 1}`)
         .setScale(0.2)
         .setVisible(false)
-        .setDepth(2)
+        .setDepth(2);
+
+        this.particulas.startFollow(this.sprite);
     }
+
 
     getPosicaoNoCentro() {
         const raioDispersao = 35; 
@@ -66,12 +78,17 @@ export class Player {
         const anguloMovimento = Phaser.Math.Angle.Between(xAtual, yAtual, pos.x, pos.y);
         this.atualizarRotacao(anguloMovimento);
 
+        this.particulas.start();
+
         this.scene.tweens.add({
             targets: this.sprite,
             x: pos.x,
             y: pos.y,
             duration: 300,
             ease: 'Cubic.easeOut',
+            onComplete: () =>{
+                this.particulas.stop();
+            }
         });
     }
 
@@ -90,6 +107,7 @@ export class Player {
 
     elimina(){
         this.isAtivo = false;
+        this.particulas.destroy();
         this.scene.tweens.add({
             targets: this.sprite,
             alpha: 0,

@@ -19,7 +19,6 @@ export class UI extends Phaser.Scene {
         this.load.image('linhaR3', 'assets/legenda/linhaR3.png');
         this.load.image('linhaR2', 'assets/legenda/linhaR2.png');
         this.load.image('linhaR1', 'assets/legenda/linhaR1.png');
-        this.load.image('cubo', 'assets/outros/cubo.png');
         this.load.image('legenda', 'assets/legenda/legenda.png');
         this.load.image('terra', 'assets/legenda/terra.png');
         this.load.image('naveET', 'assets/legenda/naveET.png');
@@ -29,10 +28,6 @@ export class UI extends Phaser.Scene {
         this.load.image('maisTres', 'assets/legenda/maisTres.png');
         this.load.image('maisQuatro', 'assets/legenda/maisQuatro.png');
         this.load.image('cartaVerso1', 'assets/cartas/cartaVerso.png');
-        this.load.spritesheet('dado', 'assets/dado/dadoSemFundo.png', { 
-            frameWidth: 200, 
-            frameHeight: 200 
-        });
     }
 
     create() {
@@ -43,6 +38,9 @@ export class UI extends Phaser.Scene {
         this.scene.sendToBack('FundoScene');
         
         this.add.image(700, 500, 'cubo').setScale(0.2);
+
+        
+
         this.add.image(1170, 500, 'linhaR1');
         this.add.image(1120, 260, 'linhaR2');
         this.add.image(945, 70, 'linhaR3');
@@ -56,7 +54,6 @@ export class UI extends Phaser.Scene {
         this.add.image(950, 920, 'linhaR5').setAngle(180);
         this.add.image(1115, 745, 'linhaR6').setAngle(180);
          
-        //this.cubo.setDepth(1);
 
         //painel lateral
         const larguraPainel = 200;
@@ -80,7 +77,22 @@ export class UI extends Phaser.Scene {
         {fontSize: '18px',
         fill: '#ffffff',
         fontStyle: 'bold'});
-        atualY += 80;
+        atualY += 100; 
+
+        if (!this.anims.exists('girar')) {
+            this.anims.create({
+                key: 'girar',
+                frames: this.anims.generateFrameNumbers('dado_spritesheet', { start: 0, end: 5 }),
+                frameRate: 15,
+                repeat: -1
+            });
+        }
+
+        this.spriteDado = this.add.sprite(larguraPainel / 2, atualY, 'dado_spritesheet', 0)
+            .setScale(0.5) 
+            .setDepth(1);
+        
+        atualY += 100; 
 
         //criando botão na tela
         this.botaoDado = this.add.text(larguraPainel / 2, atualY, 'Rolar Dado',{
@@ -135,6 +147,10 @@ export class UI extends Phaser.Scene {
             atualY += 80;
         }
 
+        this.add.image(larguraPainel + 90, this.cameras.main.height, 'legenda')
+            .setScale(1)
+            .setOrigin(0.5, 1);
+
     
         /* Comentado momentaneamente 
         this.add.image(60, 525, 'cartaVerso1').setScale(0.6).angle += 80;
@@ -157,15 +173,27 @@ export class UI extends Phaser.Scene {
             this.events.emit('rolarDado');
         });
 
-        this.anims.create({
-            key: 'girar_dado',
-            // O Phaser vai do frame 0 ao 5 (os 6 dados da imagem)
-            frames: this.anims.generateFrameNumbers('dado', { start: 0, end: 5 }),
-            frameRate: 15, // Velocidade da animação
-            repeat: -1     // Repete até mandarmos parar
-        });
+        gameScene.events.on('animarDado', (valorFinal) => {
+            this.botaoDado.disableInteractive().setAlpha(0.5);
+            this.spriteDado.play('girar');
 
-        //const dadoSprite = this.add.sprite(400, 300, 'dado', 0).setScale(2);
+            // Para o dado após 800ms no frame correspondente
+            // Frame 0 = valor 1, Frame 1 = valor 2...
+            this.time.delayedCall(800, () => {
+                this.spriteDado.stop();
+                this.spriteDado.setFrame(valorFinal - 1);
+                
+                // Feedback visual de "parada"
+                this.tweens.add({
+                    targets: this.spriteDado,
+                    scale: 0.6,
+                    duration: 100,
+                    yoyo: true
+                });
+
+                this.botaoDado.setInteractive().setAlpha(1);
+            });
+        });
 
         //lê o clique no espaço e avisa o start para a fc rolar dado
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE).on('down', ()=>{
@@ -178,21 +206,6 @@ export class UI extends Phaser.Scene {
         this.cameras.main.width, 
         this.cameras.main.height, 
         0x000000, 0.7).setVisible(false).setDepth(90);   
-
-        
-       /* Legenda sprites
-        this.add.image(145, 650, 'pontos');
-        this.add.image(60, 730, 'verde');
-        this.add.image(120, 730, 'maisUm');
-        this.add.image(60, 810, 'amarelo');
-        this.add.image(120, 810, 'maisDois');
-        this.add.image(60, 890, 'vermelho');
-        this.add.image(120, 890, 'maisTres');
-        this.add.image(200, 730, 'terra');
-        this.add.image(260, 730, 'maisQuatro');
-        this.add.image(200, 810, 'naveET');
-        this.add.image(260, 810, 'maisQuatro');*/
-        this.add.image(100, 800, 'legenda').setScale(1.2);
 
         
         //comunicação cenas
