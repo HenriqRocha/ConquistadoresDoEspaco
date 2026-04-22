@@ -39,6 +39,9 @@ export class UI extends Phaser.Scene {
         //pega a cena do start para 'ouvir' os eventos
         const gameScene = this.scene.get('Start');
 
+        this.scene.launch('FundoScene');
+        this.scene.sendToBack('FundoScene');
+        
         this.add.image(700, 500, 'cubo').setScale(0.2);
         this.add.image(1170, 500, 'linhaR1');
         this.add.image(1120, 260, 'linhaR2');
@@ -241,6 +244,36 @@ export class UI extends Phaser.Scene {
             yoyo: true,
             repeat: -1
         });
+
+
+const canvasTexture2 = this.textures.createCanvas('bubbleTexture', 512, 512);
+const ctx2 = canvasTexture.context;
+
+ctx2.fillStyle = '#ffffff';
+for (let i = 0; i < 800; i++) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 512;
+    const radius = Math.random() * 3 + 1; // Bolhas de tamanhos variados
+    
+    ctx2.beginPath();
+    ctx2.arc(x, y, radius, 0, Math.PI * 2);
+    ctx2.fill();
+}
+
+canvasTexture2.refresh();
+
+const ringRadii = [147.27, 294.54, 441.81];
+ringRadii.forEach(radius => {
+    const redRing = this.add.graphics({ x: 700, y: 500 });
+    redRing.lineStyle(25, 0xff0000, 1);
+    redRing.strokeCircle(0, 0, radius);
+
+    
+    const maskImage = this.add.tileSprite(700, 500, radius * 2.5, radius * 2.5, 'bubbleTexture')
+        .setVisible(false);
+
+    redRing.setMask(new Phaser.Display.Masks.BitmapMask(this, maskImage));
+});
 
     // Criando o efeito das partículas
     this.add.particles(0, 0, 'glow', {

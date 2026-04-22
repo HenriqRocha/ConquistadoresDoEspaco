@@ -1,6 +1,7 @@
 import { Start } from './scenes/Start.js';
 import { UI } from './scenes/UI.js';
 import { GameOver } from './scenes/GameOver.js';
+import { FundoScene } from './scenes/FundoScene.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -11,8 +12,10 @@ const config = {
     scene: [
         Start,
         UI,
-        GameOver
+        GameOver,
+        FundoScene
     ],
+    transparent: true,
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
