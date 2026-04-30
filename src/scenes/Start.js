@@ -9,9 +9,11 @@ export class Start extends Phaser.Scene {
 
     preload() {
 
+        this.load.audio('spaceConquerors', 'assets/musica/spaceConquerors.mp3');
         this.load.image('terra', 'assets/legenda/terra.png');
         this.load.image('naveET', 'assets/legenda/naveET.png');
-
+        this.load.image('audioAberto', 'assets/musica/audioAberto.png');
+        this.load.image('audioFechado', 'assets/musica/audioFechado.png');
         this.load.image('planeta-verde', 'assets/planetas/verde.png')
         this.load.image('planeta-amarelo', 'assets/planetas/amarelo.png')
         this.load.image('planeta-vermelho', 'assets/planetas/vermelho.png')
@@ -43,6 +45,7 @@ export class Start extends Phaser.Scene {
         nomesCartas.forEach(nome => {
             this.load.image(nome, `${nome}.png`);
         });
+
 
         this.load.path = '';
 
@@ -112,6 +115,32 @@ export class Start extends Phaser.Scene {
         this.cuboCentro = this.add.image(cx, cy, 'cubo')
             .setScale(0.2)
             .setDepth(1);
+
+        this.iconAudio = this.add.image(240, 30, 'audioAberto').setScale(0.1).setInteractive();
+        this.iconAudio.setInteractive({ cursor: 'pointer' });
+
+        this.musica = this.sound.add('spaceConquerors', { volume: 0.5 });
+        this.musica.play();
+
+        this.musica.on('complete', () => {
+        
+        this.musica.play({
+            seek: 1 
+        });
+        });
+
+        // Verifica ícone de áudio e solta a música
+        this.iconAudio.on('pointerdown', () => {
+            if (this.musica.isPlaying) {
+                this.musica.pause();
+                this.iconAudio.setTexture('audioFechado');
+            } 
+            else {
+                this.musica.resume();
+                this.iconAudio.setTexture('audioAberto');
+             }
+        });
+
 
         //contando objetos de pontuação
         this.objetosDePontuacaoRestantes = 0;

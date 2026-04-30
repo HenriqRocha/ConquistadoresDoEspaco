@@ -6,7 +6,7 @@ export class FundoScene extends Phaser.Scene {
 
     preload() {
         // Carrega o fundo limpo
-        this.load.image('fundoLimpo', 'assets/outros/fundoLimpo.png');
+        this.load.image('fundoSemNada', 'assets/outros/fundoSemNada.png');
     }
 
     create() {
@@ -15,7 +15,7 @@ export class FundoScene extends Phaser.Scene {
         const height = this.scale.height;
 
         // Adicionar a imagem e forçá-la a preencher a tela inteira
-        this.add.image(0, 0, 'fundoLimpo')
+        this.add.image(0, 0, 'fundoSemNada')
             .setOrigin(0)
             .setDisplaySize(width, height); 
 
