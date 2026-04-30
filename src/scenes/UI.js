@@ -1,18 +1,10 @@
-//import Phaser from "phaser";
-
-//import Phaser from "phaser";
-
-//import Phaser from "phaser";
-
 export class UI extends Phaser.Scene {
     constructor(){
         super({ key: 'UI', active: false});//cena começa inativa
     }
 
     preload(){
-        /*this.load.image('verde', 'assets/legenda/verde.png');
-        this.load.image('amarelo', 'assets/legenda/amarelo.png');
-        this.load.image('vermelho', 'assets/legenda/vermelho.png');*/
+       
         this.load.image('linhaR6', 'assets/legenda/linhaR6.png');
         this.load.image('linhaR5', 'assets/legenda/linhaR5.png');
         this.load.image('linhaR4', 'assets/legenda/linhaR4.png');
@@ -38,8 +30,6 @@ export class UI extends Phaser.Scene {
         this.scene.sendToBack('FundoScene');
         
         this.add.image(700, 500, 'cubo').setScale(0.2);
-
-        
 
         this.add.image(1170, 500, 'linhaR1');
         this.add.image(1120, 260, 'linhaR2');
@@ -150,22 +140,6 @@ export class UI extends Phaser.Scene {
         this.add.image(larguraPainel + 90, this.cameras.main.height, 'legenda')
             .setScale(1)
             .setOrigin(0.5, 1);
-
-    
-        /* Comentado momentaneamente 
-        this.add.image(60, 525, 'cartaVerso1').setScale(0.6).angle += 80;
-        this.add.image(70, 527, 'cartaVerso1').setScale(0.6).angle += 85;
-        this.add.image(80, 529, 'cartaVerso1').setScale(0.6).angle += 90;
-        this.add.image(90, 531, 'cartaVerso1').setScale(0.6).angle += 95; 
-        this.add.image(100, 533, 'cartaVerso1').setScale(0.6).angle += 100;
-        this.add.image(110, 535, 'cartaVerso1').setScale(0.6).angle += 105;
-        this.add.image(120, 537, 'cartaVerso1').setScale(0.6).angle += 110;
-        this.add.image(130, 539, 'cartaVerso1').setScale(0.6).angle += 115;
-        this.add.image(140, 541, 'cartaVerso1').setScale(0.6).angle += 120;
-        this.add.image(150, 543, 'cartaVerso1').setScale(0.6).angle += 125;
-        this.add.image(160, 545, 'cartaVerso1').setScale(0.6).angle += 130;
-        this.add.image(170, 547, 'cartaVerso1').setScale(0.6).angle += 135;
-        this.add.image(180, 549, 'cartaVerso1').setScale(0.6).angle += 320;*/
     
 
         //lê o clique do mouse e avisa o start para a fc rolar dado
