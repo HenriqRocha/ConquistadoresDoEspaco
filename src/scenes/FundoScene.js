@@ -11,11 +11,11 @@ export class FundoScene extends Phaser.Scene {
 
     create() {
         // Pegar o tamanho da tela do jogo
-        const width = this.scale.width;
-        const height = this.scale.height;
+        const centralX = 200; 
+        const centralY = 0;
 
         // Adicionar a imagem e forçá-la a preencher a tela inteira
-        this.add.image(0, 0, 'fundoSemNada')
+        this.add.image(centralX, centralY, 'fundoSemNada')
             .setOrigin(0)
             .setDisplaySize(width, height); 
 

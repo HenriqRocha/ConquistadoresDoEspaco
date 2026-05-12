@@ -44,11 +44,29 @@ export class UI extends Phaser.Scene {
         this.add.image(950, 920, 'linhaR5').setAngle(180);
         this.add.image(1115, 745, 'linhaR6').setAngle(180);
          
+        this.cameras.main.setBackgroundColor('rgba(0,0,0,0)'); // Mantém a transparência geral.
+
+        // Lança e envia para trás a FundoScene
+        if (!this.scene.isActive('FundoScene')) {
+            this.scene.launch('FundoScene');
+        }
+        this.scene.sendToBack('FundoScene');
+
+        const corPainel = 0x101151;
 
         //painel lateral
         const larguraPainel = 200;
         const padding = 25;
         let atualY = 25;//para empilhar os elementos
+
+        const painelLateralFundo = this.add.graphics();
+        painelLateralFundo.fillStyle(corPainel, 1); // Opacidade total (1).
+        
+        // Desenhar o retângulo: x, y (top-left), largura, altura.
+        // Começa em 0,0 e cobre a largura definida e toda a altura do jogo.
+        painelLateralFundo.fillRect(0, 0, larguraPainel, this.scale.height);
+
+        painelLateralFundo.setDepth(-1);
 
         //separação
         this.add.graphics()
