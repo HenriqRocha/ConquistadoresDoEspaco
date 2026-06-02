@@ -5,15 +5,15 @@ export class MenuScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('menuCompleto', 'assets/outros/telaMenu.png');
+        this.load.audio('spaceConquerors', 'assets/musica/spaceConquerors.mp3');
+        this.load.image('menuCompleto', 'assets/outros/telaMenu2.png');
+        this.load.image('audioAberto', 'assets/musica/audioAberto.png');
+        this.load.image('audioFechado', 'assets/musica/audioFechado.png');
     }
 
     create() {
         // 1. Adicionar o fundo (opaco, sem transparência entre cenas)
         this.add.image(this.scale.width / 2, this.scale.height / 2, 'menuCompleto');
-
-        // Opcional: Adicionar o dado central como decoração
-        // this.add.image(this.scale.width / 2, 350, 'cubo').setScale(0.2);
 
         // 3. Criar os botões (Inicar Jogo e Regras)
 
@@ -61,5 +61,40 @@ export class MenuScene extends Phaser.Scene {
             botaoRegras.fillStyle(0x184085, 1);
             this.scene.start('RegrasScene'); 
         });
+
+        // Dentro do create() de MenuScene.js
+
+// 1. Tenta pegar a música se ela já tiver sido criada globalmente
+this.musica = this.sound.get('spaceConquerors');
+
+// 2. Se ela não existir ainda (primeira vez que abre o menu), nós a criamos
+if (!this.musica) {
+    this.musica = this.sound.add('spaceConquerors', { volume: 0.5 });
+    
+    // Configura para repetir quando terminar (substituindo o evento 'complete')
+    this.musica.setLoop(true); 
+    this.musica.play();
+}
+
+// 3. Configuração do seu ícone de áudio (Mute/Unmute) no Menu
+this.iconAudio = this.add.image(240, 30, 'audioAberto').setScale(0.1).setInteractive();
+this.iconAudio.setInteractive({ cursor: 'pointer' });
+
+// Ajusta o ícone visual inicial caso o jogador volte para o menu com o som pausado
+if (this.musica.isPlaying) {
+    this.iconAudio.setTexture('audioAberto');
+} else {
+    this.iconAudio.setTexture('audioClosed'); // certifique-se de que a textura correta é usada
+}
+
+this.iconAudio.on('pointerdown', () => {
+    if (this.musica.isPlaying) {
+        this.musica.pause();
+        this.iconAudio.setTexture('audioFechado');
+    } else {
+        this.musica.resume();
+        this.iconAudio.setTexture('audioAberto');
+    }
+});
     }
 }
