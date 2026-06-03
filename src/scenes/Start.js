@@ -27,12 +27,6 @@ export class Start extends Phaser.Scene {
 
         this.load.image('buracoNegro', `assets/buracoNegro/buracoNegro.png`);
 
-        this.load.spritesheet('dado_spritesheet', 'assets/dado/dadoSemFundo.png', { 
-        frameWidth: 296,
-        frameHeight: 304,
-        spacing: 1 
-        });
-
         this.load.path = 'assets/cartas/';
 
         const nomesCartas = [

@@ -87,20 +87,37 @@ export class UI extends Phaser.Scene {
         fontStyle: 'bold'});
         atualY += 100; 
 
-        if (!this.anims.exists('girar')) {
-            this.anims.create({
-                key: 'girar',
-                frames: this.anims.generateFrameNumbers('dado_spritesheet', { start: 0, end: 5 }),
-                frameRate: 15,
-                repeat: -1
-            });
-        }
-
-        this.spriteDado = this.add.sprite(larguraPainel / 2, atualY, 'dado_spritesheet', 0)
-            .setScale(0.5) 
+        const DADO_SIZE = 110;
+        this.graficoDado = this.add.graphics()
+            .setPosition(larguraPainel / 2, atualY)
             .setDepth(1);
-        
-        atualY += 100; 
+
+        this.desenharFaceDado = (valor) => {
+            const g = this.graficoDado;
+            g.clear();
+            const half = DADO_SIZE / 2;
+            const dotR = 7;
+            const margin = DADO_SIZE * 0.28;
+            const pontos = {
+                1: [[0, 0]],
+                2: [[-1, -1], [1, 1]],
+                3: [[-1, -1], [0, 0], [1, 1]],
+                4: [[-1, -1], [1, -1], [-1, 1], [1, 1]],
+                5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]],
+                6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]]
+            };
+            g.fillStyle(0xffffff, 1);
+            g.fillRoundedRect(-half, -half, DADO_SIZE, DADO_SIZE, 16);
+            g.lineStyle(3, 0x444444, 1);
+            g.strokeRoundedRect(-half, -half, DADO_SIZE, DADO_SIZE, 16);
+            g.fillStyle(0x222222, 1);
+            pontos[valor].forEach(([dx, dy]) => {
+                g.fillCircle(dx * margin, dy * margin, dotR);
+            });
+        };
+
+        this.desenharFaceDado(1);
+        atualY += 100;
 
         //criando botão na tela
         this.botaoDado = this.add.text(larguraPainel / 2, atualY, 'Rolar Dado',{
@@ -109,7 +126,7 @@ export class UI extends Phaser.Scene {
             backgroundColor: 'transparent',
             padding: {x: 10, y: 5}
         }).setOrigin(0.5).setInteractive();
-        atualY += 100;
+        atualY += 60;
 
         const paddingX = 20;
         const paddingY = 10;
@@ -167,22 +184,27 @@ export class UI extends Phaser.Scene {
 
         gameScene.events.on('animarDado', (valorFinal) => {
             this.botaoDado.disableInteractive().setAlpha(0.5);
-            this.spriteDado.play('girar');
 
-            // Para o dado após 800ms no frame correspondente
-            // Frame 0 = valor 1, Frame 1 = valor 2...
+            let frameAtual = 1;
+            const timer = this.time.addEvent({
+                delay: 66,
+                repeat: 11,
+                callback: () => {
+                    frameAtual = (frameAtual % 6) + 1;
+                    this.desenharFaceDado(frameAtual);
+                }
+            });
+
             this.time.delayedCall(800, () => {
-                this.spriteDado.stop();
-                this.spriteDado.setFrame(valorFinal - 1);
-                
-                // Feedback visual de "parada"
+                timer.remove();
+                this.desenharFaceDado(valorFinal);
                 this.tweens.add({
-                    targets: this.spriteDado,
-                    scale: 0.6,
+                    targets: this.graficoDado,
+                    scaleX: 1.15,
+                    scaleY: 1.15,
                     duration: 100,
                     yoyo: true
                 });
-
                 this.botaoDado.setInteractive().setAlpha(1);
             });
         });
