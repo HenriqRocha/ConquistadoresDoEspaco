@@ -17,7 +17,7 @@ export class FundoScene extends Phaser.Scene {
         // Adicionar a imagem e forçá-la a preencher a tela inteira
         this.add.image(centralX, centralY, 'fundoSemNada')
             .setOrigin(0)
-            .setDisplaySize(width, height); 
+            .setDisplaySize(1000, 1000); 
 
     }
 }
