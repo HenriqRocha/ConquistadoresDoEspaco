@@ -51,6 +51,12 @@ export class Start extends Phaser.Scene {
         const cx = this.tabuleiro.centroX;
         const cy = this.tabuleiro.centroY;
 
+        this.events.on('reiniciarPartida', () => {
+
+        console.log("REINICIAR RECEBIDO");
+        this.scene.restart();
+
+        });
 
         // Camada 1: Brilho externo de "calor" (mais largo e muito suave)
         const brilhoExterno = this.add.circle(cx, cy, 110, 0xff3300, 0.1)
@@ -80,7 +86,6 @@ export class Start extends Phaser.Scene {
         const nucleoAura = this.add.circle(cx, cy, 65, 0xffaa00, 0.25)
             .setDepth(0.7);
 
-    // --- ANIMAÇÃO DE PULSAÇÃO ---
     // Faz o conjunto "respirar"
         this.tweens.add({
             targets: [brilhoExterno, anelPrincipal, nucleoAura],
@@ -93,7 +98,6 @@ export class Start extends Phaser.Scene {
         });
 
     // Faz a textura girar bem devagar para dar vida
-    // Agora que detalhesTextura.x/y é cx/cy, ele girará no centro do tabuleiro
         this.tweens.add({
             targets: detalhesTextura,
             rotation: Math.PI * 2,
@@ -104,9 +108,8 @@ export class Start extends Phaser.Scene {
 
         this.cuboCentro = this.add.image(cx, cy, 'cubo')
             .setScale(0.2)
-            .setDepth(1);
+            .setDepth(900);
 
-      
 
         // Busca a música criada no menu
         this.musica = this.sound.get('spaceConquerors');
@@ -229,6 +232,19 @@ export class Start extends Phaser.Scene {
             }
         });
 
+              console.log(
+    this.scene.manager.scenes.map(scene => ({
+        key: scene.scene.key,
+        active: scene.scene.isActive()
+    }))
+);
+
+    console.table(
+    this.children.list.map(obj => ({
+        texture: obj.texture?.key,
+        depth: obj.depth
+    }))
+);
     }
 
     update() {

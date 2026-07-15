@@ -20,6 +20,8 @@ export class UI extends Phaser.Scene {
         this.load.image('maisTres', 'assets/legenda/maisTres.png');
         this.load.image('maisQuatro', 'assets/legenda/maisQuatro.png');
         this.load.image('cartaVerso1', 'assets/cartas/cartaVerso.png');
+        this.load.image('btnReiniciar', 'assets/outros/reiniciar.png');
+        this.load.image('btnHome', 'assets/outros/voltarMenu.png');
     }
 
     create() {
@@ -28,9 +30,6 @@ export class UI extends Phaser.Scene {
 
         this.scene.launch('FundoScene');
         this.scene.sendToBack('FundoScene');
-        
-        this.add.image(700, 500, 'cubo').setScale(0.2);
-
         this.add.image(1170, 500, 'linhaR1');
         this.add.image(1120, 260, 'linhaR2');
         this.add.image(945, 70, 'linhaR3');
@@ -62,8 +61,6 @@ export class UI extends Phaser.Scene {
         const painelLateralFundo = this.add.graphics();
         painelLateralFundo.fillStyle(corPainel, 1); // Opacidade total (1).
         
-        // Desenhar o retângulo: x, y (top-left), largura, altura.
-        // Começa em 0,0 e cobre a largura definida e toda a altura do jogo.
         painelLateralFundo.fillRect(0, 0, larguraPainel, this.scale.height);
 
         painelLateralFundo.setDepth(-1);
@@ -172,6 +169,14 @@ export class UI extends Phaser.Scene {
             atualY += 80;
         }
 
+        this.add.image(60, 855, 'cartaVerso1').setScale(0.6).angle += 80;
+        this.add.image(70, 857, 'cartaVerso1').setScale(0.6).angle += 85;
+        this.add.image(80, 859, 'cartaVerso1').setScale(0.6).angle += 90;
+        this.add.image(90, 861, 'cartaVerso1').setScale(0.6).angle += 95; 
+        this.add.image(100, 863, 'cartaVerso1').setScale(0.6).angle += 100;
+        this.add.image(110, 865, 'cartaVerso1').setScale(0.6).angle += 105;
+        this.add.image(120, 867, 'cartaVerso1').setScale(0.6).angle += 110;
+
         this.add.image(larguraPainel + 90, this.cameras.main.height, 'legenda')
             .setScale(1)
             .setOrigin(0.5, 1);
@@ -245,7 +250,16 @@ export class UI extends Phaser.Scene {
         const centY = 500;
         const radius = 150;
 
-        const canvasTexture = this.textures.createCanvas('glow', radius * 2, radius * 2);
+        if (this.textures.exists('glow')) {
+            this.textures.remove('glow');
+        }
+
+        const canvasTexture = this.textures.createCanvas(
+            'glow',
+            radius * 2,
+            radius * 2
+        );
+
         const ctx = canvasTexture.context;
 
         const gradient = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
@@ -273,15 +287,21 @@ export class UI extends Phaser.Scene {
         });
 
 
+if (this.textures.exists('bubbleTexture')) {
+    this.textures.remove('bubbleTexture');
+}
+
 const canvasTexture2 = this.textures.createCanvas('bubbleTexture', 512, 512);
-const ctx2 = canvasTexture.context;
+
+const ctx2 = canvasTexture2.context;
 
 ctx2.fillStyle = '#ffffff';
+
 for (let i = 0; i < 800; i++) {
     const x = Math.random() * 512;
     const y = Math.random() * 512;
-    const radius = Math.random() * 3 + 1; // Bolhas de tamanhos variados
-    
+    const radius = Math.random() * 3 + 1;
+
     ctx2.beginPath();
     ctx2.arc(x, y, radius, 0, Math.PI * 2);
     ctx2.fill();
@@ -313,7 +333,6 @@ ringRadii.forEach(radius => {
             type: 'edge',
             source: new Phaser.Geom.Circle(700, 500, 147.27), 
             quantity: 200
-            //stepRate: 0.5
         }
     });
 
@@ -343,7 +362,48 @@ ringRadii.forEach(radius => {
         },
         
     });
-    }
+
+const barraLateralX = 100; 
+
+// 1. ÍCONE REINICIAR O JOGO
+const iconeReiniciar = this.add.image(1140, 30, 'btnReiniciar')
+    .setScale(0.1) // Ajuste a escala para caber na sua barra lateral
+    .setInteractive({ cursor: 'pointer' });
+
+iconeReiniciar.on('pointerdown', () => {
+   
+    const gameScene = this.scene.get('Start');
+
+    gameScene.events.emit('reiniciarPartida');
+});
+
+
+// 2. ÍCONE VOLTAR PARA O MENU PRINCIPAL (HOME)
+const iconeMenu = this.add.image(1060, 30, 'btnHome')
+    .setScale(0.1) // Ajuste a escala para o mesmo tamanho do outro ícone
+    .setInteractive({ cursor: 'pointer' });
+
+iconeMenu.on('pointerdown', () => {
+    this.scene.stop('UI');
+    this.scene.stop('Start');
+    this.scene.stop('FundoScene');
+    
+    // Pequena segurança: remove da fila ativa qualquer resquício visual
+    this.scene.get('Start').scene.setVisible(false);
+    this.scene.get('UI').scene.setVisible(false);
+    this.scene.get('FundoScene').scene.setVisible(false);
+    
+    const menu = this.scene.get('MenuScene');
+    menu.scene.restart();
+});
+
+
+iconeReiniciar.on('pointerover', () => iconeReiniciar.setTint(0xffaaaa)); // Deixa levemente avermelhado
+iconeReiniciar.on('pointerout', () => iconeReiniciar.clearTint());
+
+iconeMenu.on('pointerover', () => iconeMenu.setTint(0xccddee)); // Deixa levemente azulado
+iconeMenu.on('pointerout', () => iconeMenu.clearTint());
+}
 
     //animação carta
     ativarEfeitoCarta(nomeDaCarta, gameScene) {
@@ -357,12 +417,12 @@ ringRadii.forEach(radius => {
         // Desativa interações para evitar bugs durante a animação
         this.botaoDado.disableInteractive().setAlpha(0.5);
 
-        const carta = this.add.sprite(centroX, this.cameras.main.height + 300, nomeDaCarta)
+        const carta = this.add.sprite(50, this.cameras.main.height + 100, nomeDaCarta)
             .setScale(0.5)
             .setAlpha(0)
             .setDepth(100);
 
-        const botaoOk = this.add.text(centroX, this.cameras.main.height + 500, 'ENTENDIDO', {
+        const botaoOk = this.add.text(50, this.cameras.main.height + 500, 'ENTENDIDO', {
             fontSize: '24px',
             fill: '#ffffff',
             backgroundColor: '#00d1b2',
@@ -375,38 +435,55 @@ ringRadii.forEach(radius => {
 
         this.tweens.add({
             targets: [carta, botaoOk],
-            y: (target) => target === carta ? centroY - 40 : centroY + 420,
-            alpha: 1,
+            
+            // Alinha horizontalmente: a carta vai para o centro exato, o botão também
+            x: centroX,
+            
+            // Condicional para o eixo Y: coloca a carta no meio e o botão logo abaixo dela
+            y: (target) => target === carta ? centroY - 80 : centroY + 360, 
+            
+            alpha: 1, // Ambos ficam visíveis
+            
             scale: (target) => target === carta ? 1 : 1,
+            
             duration: 700,
             ease: 'Back.easeOut',
             onComplete: () => {
-                botaoOk.setInteractive().on('pointerdown',()=>{
+                botaoOk.setInteractive().on('pointerdown', () => {
                     this.fecharCarta(gameScene);
                 });
-            }
-        });
+    }
+});
     }
 
-    fecharCarta(gameScene){
-        this.tweens.add({
-            targets: [this.cartaEmExibicao, this.botaoOkEmExibicao],
-            y: this.cameras.main.height + 500,
-            alpha: 0,
-            duration: 700,
-            ease: 'Power2',
-            onComplete: ()=>{
-                this.overlay.setVisible(false);
-                this.botaoDado.setInteractive().setAlpha(1);
-                
-                if (this.cartaEmExibicao){this.cartaEmExibicao.destroy();}
-                if (this.botaoOkExibicao){this.botaoOkExibicao.destroy();}
-                
-                this.cartaEmExibicao = null;
-                this.botaoOkExibicao = null;
-
-                gameScene.events.emit('cartaFechada');
-            }
-        });
-    }
+    fecharCarta(gameScene) {
+    this.tweens.add({
+        targets: [this.cartaEmExibicao, this.botaoOkEmExibicao],
+        
+        x: (target) => target === this.cartaEmExibicao ? 70 : 70,
+        
+        y: (target) => target === this.cartaEmExibicao ? this.cameras.main.height - 100 : this.cameras.main.height + 100,
+        
+        alpha: 0,
+        
+        // Reduz a escala da carta para voltar a ser pequenininha (0.1) no bolo
+        scale: (target) => target === this.cartaEmExibicao ? 0.1 : target.scale,
+        
+        duration: 500,
+        ease: 'Power2',
+        onComplete: () => {
+            this.overlay.setVisible(false);
+            this.botaoDado.setInteractive().setAlpha(1);
+            
+            if (this.cartaEmExibicao) { this.cartaEmExibicao.destroy(); }
+            if (this.botaoOkEmExibicao) { this.botaoOkEmExibicao.destroy(); }
+            
+            this.cartaEmExibicao = null;
+            this.botaoOkEmExibicao = null;
+            
+            gameScene.events.emit('cartaFechada');
+        }
+    });
+}
+    
 }
