@@ -17,9 +17,10 @@ export class Player {
 
         this.sprite = scene.add.image(0, 0, `nave00${id + 1}`)
         .setScale(0.2)
-        .setVisible(false)
-        .setDepth(2);
+        .setVisible(false);
 
+        this.sprite.setDepth(1000)
+        
         this.particulas.startFollow(this.sprite);
     }
 
