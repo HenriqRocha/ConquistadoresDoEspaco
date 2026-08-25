@@ -254,37 +254,39 @@ export class UI extends Phaser.Scene {
             this.textures.remove('glow');
         }
 
-        const canvasTexture = this.textures.createCanvas(
-            'glow',
-            radius * 2,
-            radius * 2
-        );
+            console.log("Radius da textura:", radius);
 
-        const ctx = canvasTexture.context;
+            const canvasTexture = this.textures.createCanvas(
+                'glow',
+                radius * 2,
+                radius * 2
+            );
 
-        const gradient = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
-        
-        gradient.addColorStop(0, 'rgba(255, 0, 0, 0.8)');
-        gradient.addColorStop(0.5, 'rgba(150, 0, 0, 0.4)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            const ctx = canvasTexture.context;
 
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, radius * 2, radius * 2);
+            const gradient = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+            
+            gradient.addColorStop(0, 'rgba(255, 0, 0, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(150, 0, 0, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
-        canvasTexture.refresh();
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, radius * 2, radius * 2);
 
-        const centroGrow = this.add.image(centX, centY, 'glow');
+            canvasTexture.refresh();
 
-        centroGrow.setBlendMode(Phaser.BlendModes.ADD);
+            const centroGrow = this.add.image(centX, centY, 'glow');
 
-        this.tweens.add({
-            targets: centroGrow,
-            alpha: 0.5,
-            scale: 1.1,
-            duration: 2000,
-            yoyo: true,
-            repeat: -1
-        });
+            centroGrow.setBlendMode(Phaser.BlendModes.ADD);
+
+            this.tweens.add({
+                targets: centroGrow,
+                alpha: 0.5,
+                scale: 1.1,
+                duration: 2000,
+                yoyo: true,
+                repeat: -1
+            });
 
 
 if (this.textures.exists('bubbleTexture')) {
@@ -322,24 +324,26 @@ ringRadii.forEach(radius => {
     redRing.setMask(new Phaser.Display.Masks.BitmapMask(this, maskImage));
 });
 
-    // Criando o efeito das partículas
+    // Criando o efeito das partículas | Diminuir velocidade
     this.add.particles(0, 0, 'glow', {
-        lifespan: 2000,
+        lifespan: 2000, // Estava em 2000
         speed: { min: 20, max: 30 },
-        scale: { start: 0.2, end: 0 },
+        scale: { start: 0.1, end: 0 },
         alpha: { start: 1, end: 0 },
         blendMode: 'ADD',
         emitZone: {
             type: 'edge',
             source: new Phaser.Geom.Circle(700, 500, 147.27), 
-            quantity: 200
+            quantity: 200 // Estava em 200
         }
     });
 
+    // Diminuir velocidade
+
     this.add.particles(0, 0, 'glow', {
         lifespan: 2000,
-        speed: { min: 10, max: 20 },
-        scale: { start: 0.2, end: 0 },
+        speed: { min: 20, max: 30 },
+        scale: { start: 0.12, end: 0 },
         alpha: { start: 1, end: 0 },
         blendMode: 'ADD',
         emitZone: {
@@ -352,13 +356,13 @@ ringRadii.forEach(radius => {
     this.add.particles(0, 0, 'glow', {
         lifespan: 2000,
         speed: { min: 20, max: 30 },
-        scale: { start: 0.2, end: 0 },
+        scale: { start: 0.16, end: 0 },
         alpha: { start: 1, end: 0 },
         blendMode: 'ADD',
         emitZone: {
             type: 'edge',
             source: new Phaser.Geom.Circle(700, 500, 441.81), 
-            quantity: 200
+            quantity: 200 
         },
         
     });
