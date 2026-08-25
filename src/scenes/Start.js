@@ -17,7 +17,7 @@ export class Start extends Phaser.Scene {
         this.load.image('planeta-verde', 'assets/planetas/verde.png')
         this.load.image('planeta-amarelo', 'assets/planetas/amarelo.png')
         this.load.image('planeta-vermelho', 'assets/planetas/vermelho.png')
-        this.load.image('cubo', 'assets/outros/cubo.png');
+        this.load.image('cubo', 'assets/outros/cuboTransparente.png');
 
         this.load.path = '';
 
@@ -83,7 +83,7 @@ export class Start extends Phaser.Scene {
         detalhesTextura.setDepth(0.6);
 
     // Camada 4: Núcleo interno (brilho amarelado mais forte antes do cubo)
-        const nucleoAura = this.add.circle(cx, cy, 65, 0xffaa00, 0.25)
+        const nucleoAura = this.add.circle(cx, cy, 65, 0xffaa00, 0.05) // Estava em 0.25
             .setDepth(0.7);
 
     // Faz o conjunto "respirar"
@@ -107,7 +107,7 @@ export class Start extends Phaser.Scene {
 
 
         this.cuboCentro = this.add.image(cx, cy, 'cubo')
-            .setScale(0.2)
+            .setScale(0.12) // Estava em 0.2
             .setDepth(900);
 
 
@@ -178,6 +178,10 @@ export class Start extends Phaser.Scene {
             // Reflexões (R1 = Eixo Vertical, R4 = Eixo Horizontal, pode ser ajustado)
             { titulo: 'Reflexão na Reta R1', imagem: 'reflexaoNaRetaR1', efeito: 'REFLEXAO', valor: 'R1' },
             { titulo: 'Reflexão na Reta R4', imagem: 'reflexaoNaRetaR4', efeito: 'REFLEXAO', valor: 'R4' },
+            { titulo: 'Reflexão na Reta R2', imagem: 'reflexaoNaRetaR2', efeito: 'REFLEXAO', valor: 'R2' },
+            { titulo: 'Reflexão na Reta R3', imagem: 'reflexaoNaRetaR3', efeito: 'REFLEXAO', valor: 'R3' },
+            { titulo: 'Reflexão na Reta R5', imagem: 'reflexaoNaRetaR5', efeito: 'REFLEXAO', valor: 'R5' },
+            { titulo: 'Reflexão na Reta R6', imagem: 'reflexaoNaRetaR6', efeito: 'REFLEXAO', valor: 'R6' },
 
             // Efeitos de Jogo
             { titulo: 'Campo Atrator', imagem: 'campoAtrator', efeito: 'PERDE_MOVIMENTO_RESTANTE' },
