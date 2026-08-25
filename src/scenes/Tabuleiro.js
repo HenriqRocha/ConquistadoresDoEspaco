@@ -39,11 +39,11 @@ export class Tabuleiro {
         this.tabuleiroPontos[5][4] = 'planeta';
         this.tabuleiroPontos[1][2] = 'planeta';
         this.tabuleiroPontos[5][5] = 'buraco';
-        this.tabuleiroPontos[3][9] = 'buraco';
+        this.tabuleiroPontos[4][9] = 'buraco';
         this.tabuleiroPontos[4][2] = 'buraco';
         this.tabuleiroPontos[8][4] = 'buraco';
         this.tabuleiroPontos[1][10] = 'planeta';
-        this.tabuleiroPontos[7][11] = 'buraco';
+        this.tabuleiroPontos[8][11] = 'buraco';
         this.tabuleiroPontos[5][8] = 'planeta';
         this.tabuleiroPontos[5][1] = 'planeta';
         this.tabuleiroPontos[4][6] = 'planeta';
@@ -101,6 +101,11 @@ export class Tabuleiro {
                 console.log(`Raio: ${raioAtual}`);             
             }
             //circulos brancos
+
+            if(i == 0)
+            {
+                this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xFFFFFFFF, 0.5). setDepth(0);
+            }
             this.scene.add.circle(this.centroX, this.centroY, (i + 1) * this.distanciaEntreAneis).setStrokeStyle(2, 0xffffff, 0.5). setDepth(0);
         }
 
