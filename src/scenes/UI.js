@@ -410,55 +410,116 @@ iconeMenu.on('pointerout', () => iconeMenu.clearTint());
 }
 
     //animação carta
-    ativarEfeitoCarta(nomeDaCarta, gameScene) {
-        if (this.cartaEmExibicao) return;
+   ativarEfeitoCarta(nomeDaCarta, gameScene) {
 
-        const centroX = this.cameras.main.width / 2;
-        const centroY = this.cameras.main.height / 2;
+    if (this.cartaEmExibicao) return;
 
-        this.overlay.setVisible(true);
-        
-        // Desativa interações para evitar bugs durante a animação
-        this.botaoDado.disableInteractive().setAlpha(0.5);
+    const centroX = this.cameras.main.width / 2;
+    const centroY = this.cameras.main.height / 2;
 
-        const carta = this.add.sprite(50, this.cameras.main.height + 100, nomeDaCarta)
-            .setScale(0.5)
-            .setAlpha(0)
-            .setDepth(100);
+    this.overlay.setVisible(true);
 
-        const botaoOk = this.add.text(50, this.cameras.main.height + 500, 'ENTENDIDO', {
+    // Desativa interações durante a carta
+    this.botaoDado.disableInteractive().setAlpha(0.5);
+
+    // ==========================================
+    // TAMANHO PADRÃO DAS CARTAS
+    // ==========================================
+
+    const larguraMaxima = 480;
+    const alturaMaxima = 640;
+
+    // Cria a carta
+    const carta = this.add.sprite(
+        50,
+        this.cameras.main.height + 100,
+        nomeDaCarta
+    )
+    .setAlpha(0)
+    .setDepth(100);
+
+    // ------------------------------------------
+    // Calcula escala para caber no tamanho
+    // padrão sem deformar a imagem
+    // ------------------------------------------
+
+    const escalaFinal = Math.min(
+        larguraMaxima / carta.width,
+        alturaMaxima / carta.height
+    );
+
+    // Começa menor para manter a animação
+    const escalaInicial = escalaFinal * 0.5;
+
+    carta.setScale(escalaInicial);
+
+    // ==========================================
+    // BOTÃO ENTENDIDO
+    // ==========================================
+
+    const botaoOk = this.add.text(
+        50,
+        this.cameras.main.height + 500,
+        'ENTENDIDO',
+        {
             fontSize: '24px',
             fill: '#ffffff',
             backgroundColor: '#00d1b2',
-            padding: { x: 30, y: 20 },
+            padding: {
+                x: 30,
+                y: 20
+            },
             fontStyle: 'bold'
-        }).setOrigin(0.5).setDepth(101).setAlpha(0);
+        }
+    )
+    .setOrigin(0.5)
+    .setDepth(101)
+    .setAlpha(0);
 
-        this.cartaEmExibicao = carta;
-        this.botaoOkEmExibicao = botaoOk;
+    this.cartaEmExibicao = carta;
+    this.botaoOkEmExibicao = botaoOk;
 
-        this.tweens.add({
-            targets: [carta, botaoOk],
-            
-            // Alinha horizontalmente: a carta vai para o centro exato, o botão também
-            x: centroX,
-            
-            // Condicional para o eixo Y: coloca a carta no meio e o botão logo abaixo dela
-            y: (target) => target === carta ? centroY - 80 : centroY + 360, 
-            
-            alpha: 1, // Ambos ficam visíveis
-            
-            scale: (target) => target === carta ? 1 : 1,
-            
-            duration: 700,
-            ease: 'Back.easeOut',
-            onComplete: () => {
-                botaoOk.setInteractive().on('pointerdown', () => {
+    // ==========================================
+    // ANIMAÇÃO
+    // ==========================================
+
+    this.tweens.add({
+
+        targets: [carta, botaoOk],
+
+        x: centroX,
+
+        y: (target) =>
+            target === carta
+                ? centroY - 80
+                : centroY + 360,
+
+        alpha: 1,
+
+        // Carta cresce até o tamanho correto
+        scale: (target) =>
+            target === carta
+                ? escalaFinal
+                : 1,
+
+        duration: 700,
+
+        ease: 'Back.easeOut',
+
+        onComplete: () => {
+
+            botaoOk
+                .setInteractive()
+                .on('pointerdown', () => {
+
                     this.fecharCarta(gameScene);
+
                 });
-    }
-});
-    }
+
+        }
+
+    });
+}
 
     fecharCarta(gameScene) {
     this.tweens.add({

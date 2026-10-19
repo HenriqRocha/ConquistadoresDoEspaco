@@ -7,6 +7,14 @@ export class Start extends Phaser.Scene {
         super('Start');
     }
 
+    init(data) {
+        this.numeroDeJogadores = data?.numeroDeJogadores ?? 3;
+
+        console.log(
+            `Número de jogadores recebido: ${this.numeroDeJogadores}`
+    );
+}
+
     preload() {
 
         this.load.audio('spaceConquerors', 'assets/musica/spaceConquerors.mp3');
@@ -33,7 +41,7 @@ export class Start extends Phaser.Scene {
             'campoAtrator', 'giroAnti-horario120', 'giroAnti-horario150', 'giroAnti-horario180',
             'giroAnti-horario30', 'giroAnti-horario60', 'giroAnti-horario90', 'giroHorario120',
             'giroHorario150', 'giroHorario180', 'giroHorario30', 'giroHorario60', 'giroHorario90',
-            'leveTurbulencia', 'reflexaoNaRetaR1', 'reflexaoNaRetaR4'
+            'leveTurbulencia', 'reflexaoNaRetaR1', 'reflexaoNaRetaR4', 'reflexaoNaRetaR2', 'reflexaoNaRetaR3', 'reflexaoNaRetaR5', 'reflexaoNaRetaR6'
         ]
 
         nomesCartas.forEach(nome => {
@@ -57,6 +65,10 @@ export class Start extends Phaser.Scene {
         this.scene.restart();
 
         });
+
+
+        //Ajustando tamanho das cartas
+        
 
         // Camada 1: Brilho externo de "calor" (mais largo e muito suave)
         const brilhoExterno = this.add.circle(cx, cy, 110, 0xff3300, 0.1)
@@ -154,7 +166,7 @@ export class Start extends Phaser.Scene {
         });
         console.log(`objetos de pontos no tabuleiro: ${this.objetosDePontuacaoRestantes}`);
 
-        this.numeroDeJogadores = 3;//número de jogadores
+        //this.numeroDeJogadores = 3;//número de jogadores
         this.jogadorAtualIndex = 0;//começa com o primeiro jogador
         this.movimentosRestantes = 0;
         this.estadoTurno = 'AGUARDANDO_JOGADA';
@@ -383,10 +395,19 @@ export class Start extends Phaser.Scene {
             case 'REFLEXAO': {
                 let { coluna } = jogadorAtual.position;
                 let novaCol = coluna;
+                
                 if (cartaSorteada.valor === 'R1') {
                     novaCol = (12 - coluna) % 12;
+                } else if (cartaSorteada.valor === 'R2') {
+                    novaCol = (10 - coluna + 12) % 12;
+                } else if (cartaSorteada.valor === 'R3') {
+                    novaCol = (8 - coluna + 12) % 12;
                 } else if (cartaSorteada.valor === 'R4') {
                     novaCol = (6 - coluna + 12) % 12;
+                } else if (cartaSorteada.valor === 'R5') {
+                    novaCol = (4 - coluna + 12) % 12;
+                } else if (cartaSorteada.valor === 'R6') {
+                    novaCol = (2 - coluna + 12) % 12;
                 }
 
                 if (!this.isOcupado(linha, novaCol)) {

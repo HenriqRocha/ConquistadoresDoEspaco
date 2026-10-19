@@ -57,8 +57,9 @@ export class MenuScene extends Phaser.Scene {
         botaoIniciar.on('pointerup', () => {
             //botaoIniciar.fillStyle(0x184085, 1);
             console.log("CLIQUE!");
-            this.scene.stop();
-            this.scene.start('Start'); 
+            //this.scene.stop();
+            //this.scene.start('Start'); 
+            this.mostrarSelecaoJogadores();
         });
 
         // 5. Lógica do clique (Regras)
@@ -105,4 +106,136 @@ export class MenuScene extends Phaser.Scene {
 
         console.log(botaoAudio);
     }
+
+    mostrarSelecaoJogadores() {
+
+    // Fundo escuro sobre o menu
+    const fundo = this.add.rectangle(
+        this.scale.width / 2,
+        this.scale.height / 2,
+        this.scale.width,
+        this.scale.height,
+        0x000000,
+        0.70
+    );
+
+    fundo.setDepth(20);
+
+    // Título
+    const titulo = this.add.text(
+        this.scale.width / 2,
+        300,
+        'QUANTOS JOGADORES?',
+        {
+            fontSize: '32px',
+            fill: '#ffffff',
+            fontWeight: 'bold'
+        }
+    )
+    .setOrigin(0.5)
+    .setDepth(21);
+
+    // =========================
+    // BOTÃO 2 JOGADORES
+    // =========================
+
+    const botao2 = this.add.rectangle(
+        this.scale.width / 2 - 100,
+        420,
+        170,
+        70,
+        0x184085
+    );
+
+    botao2
+        .setDepth(21)
+        .setInteractive({ cursor: 'pointer' });
+
+    const texto2 = this.add.text(
+        this.scale.width / 2 - 100,
+        420,
+        '2 JOGADORES',
+        {
+            fontSize: '20px',
+            fill: '#ffffff',
+            fontWeight: 'bold'
+        }
+    )
+    .setOrigin(0.5)
+    .setDepth(22);
+
+    // =========================
+    // BOTÃO 3 JOGADORES
+    // =========================
+
+    const botao3 = this.add.rectangle(
+        this.scale.width / 2 + 100,
+        420,
+        170,
+        70,
+        0x184085
+    );
+
+    botao3
+        .setDepth(21)
+        .setInteractive({ cursor: 'pointer' });
+
+    const texto3 = this.add.text(
+        this.scale.width / 2 + 100,
+        420,
+        '3 JOGADORES',
+        {
+            fontSize: '20px',
+            fill: '#ffffff',
+            fontWeight: 'bold'
+        }
+    )
+    .setOrigin(0.5)
+    .setDepth(22);
+
+    // =========================
+    // CLIQUE: 2 JOGADORES
+    // =========================
+
+    botao2.on('pointerover', () => {
+        botao2.setFillStyle(0x285aa0);
+    });
+
+    botao2.on('pointerout', () => {
+        botao2.setFillStyle(0x184085);
+    });
+
+    botao2.on('pointerup', () => {
+
+        console.log('2 jogadores selecionado');
+
+        this.scene.start('Start', {
+            numeroDeJogadores: 2
+        });
+
+    });
+
+    // =========================
+    // CLIQUE: 3 JOGADORES
+    // =========================
+
+    botao3.on('pointerover', () => {
+        botao3.setFillStyle(0x285aa0);
+    });
+
+    botao3.on('pointerout', () => {
+        botao3.setFillStyle(0x184085);
+    });
+
+    botao3.on('pointerup', () => {
+
+        console.log('3 jogadores selecionado');
+
+        this.scene.start('Start', {
+            numeroDeJogadores: 3
+        });
+
+    });
+}
+
 }
